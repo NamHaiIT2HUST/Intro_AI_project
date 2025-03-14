@@ -1,6 +1,8 @@
 from tkinter import messagebox
 from tkintermapview import TkinterMapView
 from tkinter import Tk
+
+import osmnx as ox
 import customtkinter
 import networkx as nx
 
@@ -14,9 +16,6 @@ class App(customtkinter.CTk):
         self.resizable(False, False)
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.createcommand("exit", self.on_closing)
-
-        self.market = []
-        self.graph = nx.Graph()
 
     def on_closing(self, event=None):
         self.destroy()
