@@ -1,7 +1,6 @@
 from tkinter import messagebox
 from tkintermapview import TkinterMapView
 from tkinter import Tk
-
 import osmnx as ox
 import customtkinter
 import networkx as nx
@@ -19,8 +18,6 @@ class App(customtkinter.CTk):
 
     def on_closing(self, event=None):
         self.destroy()
-
-        
 
 
 if __name__ == '__main__':
