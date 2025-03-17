@@ -16,8 +16,7 @@ class Algorithm(ABC):
             path.append(current)
             current = came_from[current]
         path.append(start)
-        path.reverse()
-        return path
+        return path[::-1]
 
 class AStar(Algorithm):
     def __init__(self, heuristic, graph = None):
