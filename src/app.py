@@ -65,6 +65,10 @@ class App(customtkinter.CTk):
 
     def on_map_click(self, event):
         lat, lon = self.map_widget.convert_canvas_coords_to_decimal_coords(event.x, event.y)
+
+        if self.start_node and self.goal_node:
+            return None
+        
         node_id = f"node_{len(self.graph.nodes)}"
         self.graph.add_node(node_id, lat, lon)
 
@@ -77,10 +81,6 @@ class App(customtkinter.CTk):
         elif not self.goal_node:
             self.goal_node = node_id
             marker.set_text("Goal")
-            # Auto add edges for demo (bidirectional)
-            distance = self.distance(self.start_node, self.goal_node)
-            self.graph.add_edge(self.start_node, self.goal_node, distance)
-            self.graph.add_edge(self.goal_node, self.start_node, distance)
 
     def run_algorithm(self):
         if not self.start_node or not self.goal_node:
