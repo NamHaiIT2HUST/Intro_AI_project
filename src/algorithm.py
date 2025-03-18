@@ -14,7 +14,9 @@ class Algorithm(ABC):
         current = goal
         while current != start:
             path.append(current)
-            current = came_from[current]
+            if came_from.get(current) is None:
+                return None
+            current = came_from.get(current, None)
         path.append(start)
         return path[::-1]
 
