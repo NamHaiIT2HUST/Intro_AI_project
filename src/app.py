@@ -1,7 +1,7 @@
 from tkintermapview import TkinterMapView
 import customtkinter
 from graph import Graph
-from algorithm import AStar, Dijkstra, BFS, DFS, Greedy, BellmanFord
+from algorithm import *
 import math
 
 class App(customtkinter.CTk):
