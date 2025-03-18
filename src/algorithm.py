@@ -39,7 +39,7 @@ class AStar(Algorithm):
                 return self.reconstruct_path(start, goal, came_from)
             for neighbor in graph.neighbors(current):
                 tentative_g_score = g_score[current] + graph.cost(current, neighbor)
-                if tentative_g_score < g_score[neighbor]:
+                if tentative_g_score < g_score.get(neighbor, float('inf')):
                     came_from[neighbor] = current
                     g_score[neighbor] = tentative_g_score
                     f_score[neighbor] = g_score[neighbor] + graph.heuristic(neighbor, goal)
@@ -86,7 +86,7 @@ class Dijkstra(Algorithm):
                 return self.reconstruct_path(start, goal, came_from)
             for neighbor in graph.neighbors(current):
                 tentative_g_score = g_score[current] + graph.cost(current, neighbor)
-                if tentative_g_score < g_score[neighbor]:
+                if tentative_g_score < g_score.get(neighbor, float('inf')):
                     came_from[neighbor] = current
                     g_score[neighbor] = tentative_g_score
                     open_set.put((g_score[neighbor], neighbor))
