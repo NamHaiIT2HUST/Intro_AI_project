@@ -16,7 +16,7 @@ class Algorithm(ABC):
             path.append(current)
             if came_from.get(current) is None:
                 return None
-            current = came_from.get(current, None)
+            current = came_from[current]
         path.append(start)
         return path[::-1]
 
