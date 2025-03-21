@@ -10,8 +10,8 @@ import threading
 
 class App(customtkinter.CTk):
     APP_NAME = "Map View - Bách Khoa"
-    CENTER_LAT, CENTER_LON = 21.004981, 105.8463
-    custom_filter = '["highway"~"primary|secondary|tertiary|residential|unclassified|service|footway"]'
+    CENTER_LAT, CENTER_LON = 21.0052, 105.8463
+    source_path = "/intro_ai/res/map1.osm"
     ALGORITHMS = {
         "A*": lambda self: AStar(self.distance),
         "Dijkstra": lambda _: Dijkstra(),
@@ -155,8 +155,8 @@ class App(customtkinter.CTk):
         self.map_widget.canvas.bind("<Button-1>", self.on_map_click)
 
         # Tắt hoàn toàn sự kiện chuột mặc định của bản đồ
-        # for event in ("<B1-Motion>", "<ButtonRelease-1>", "<MouseWheel>"):
-        #     self.map_widget.canvas.unbind(event)
+        for event in ("<B1-Motion>", "<ButtonRelease-1>"):
+            self.map_widget.canvas.unbind(event)
 
     def on_map_click(self, event):
         # Nếu đã có cả điểm đầu và điểm đích, không cho phép thêm điểm mới
@@ -168,7 +168,9 @@ class App(customtkinter.CTk):
         if not self.g:
             return  # Bản đồ chưa được tải xong
             
+        print(f"Clicked at: {lat}, {lon}")
         node = self.find_nearest_node(lat, lon)
+        print(f"Nearest node: {node}")
         
         marker = self.map_widget.set_marker(lat, lon)
         self.markers.append(marker)
@@ -248,7 +250,7 @@ class App(customtkinter.CTk):
     def load_graph(self):
         try:
             # Tải dữ liệu đồ thị từ file OSM
-            self.g = ox.graph_from_xml("/intro_ai/res/map2.osm", retain_all=True, simplify=False)
+            self.g = ox.graph_from_xml(self.source_path, retain_all=True, simplify=False)
             
             # Chuyển đổi sang đồ thị nội bộ
             for node_id, data in self.g.nodes(data=True):
@@ -274,7 +276,7 @@ class App(customtkinter.CTk):
     @lru_cache(maxsize=128)
     def find_nearest_node(self, lat, lon):
         """Tìm nút gần nhất với tọa độ đã cho, với cache để tăng hiệu suất"""
-        return self.graph.find_nearest_node(lat, lon)
+        return self.graph.find_nearest_node_within_radius(lat, lon, initial_radius=10, step=10, max_radius=1000)
 
     def run_algorithm_thread(self):
         """Khởi chạy thuật toán trong một luồng riêng biệt"""
@@ -392,7 +394,7 @@ class App(customtkinter.CTk):
         if stats:
             self.distance_label.configure(text=f"Khoảng cách: {stats.get('distance', 'N/A'):.2f} m")
             self.nodes_label.configure(text=f"Số nút đã duyệt: {stats.get('expanded_nodes', 'N/A')}")
-            self.time_label.configure(text=f"Thời gian tìm kiếm: {stats.get('time', 'N/A')} ms")
+            self.time_label.configure(text=f"Thời gian tìm kiếm: {stats.get('time', 'N/A'):.3f} ms")
 
 
 if __name__ == '__main__':

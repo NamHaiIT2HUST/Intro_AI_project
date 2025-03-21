@@ -1,5 +1,7 @@
 import math
 from math import radians, sin, cos, sqrt, atan2
+from scipy.spatial import KDTree
+from geopy.distance import geodesic
 
 class Graph:
     def __init__(self):
@@ -7,9 +9,14 @@ class Graph:
         self.adj_list = {}  # node_id -> list of (neighbor_id, cost)
         self.edges = []  # (u, v, cost) cho Bellman-Ford
 
+        self._kd_tree = None  # KDTree for nearest neighbor search
+        self._node_ids = []  # list of node ids for KDTree
+
     def add_node(self, node_id, lat, lon):
         self.nodes[node_id] = (lat, lon)
         self.adj_list[node_id] = []
+        self.kd_tree = None  # Reset KDTree when adding a new node
+        self._node_ids.append(node_id)
 
     def add_edge(self, u, v, cost):
         self.adj_list[u].append((v, cost))
@@ -55,3 +62,33 @@ class Graph:
     
     def has_edge(self, u, v):
         return v in self.neighbors(u)
+    
+    def find_nearest_node_within_radius(self, lat, lon, initial_radius=10, step=10, max_radius=1000):
+        if not self._kd_tree:
+            self._build_kdtree()
+
+        radius = initial_radius
+
+        while radius <= max_radius:
+            approx_radius_deg = radius / 111320  # Đổi mét sang độ
+            idxs = self._kd_tree.query_ball_point([lat, lon], r=approx_radius_deg)
+
+            if idxs:
+                candidates = []
+                for idx in idxs:
+                    node_id = self._node_ids[idx]
+                    node_lat, node_lon = self.nodes[node_id]
+                    distance_m = geodesic((lat, lon), (node_lat, node_lon)).meters
+                    candidates.append((distance_m, node_id))
+
+                candidates.sort()
+                return candidates[0][1]
+
+            radius += step
+
+        return None
+
+    def _build_kdtree(self):
+        self._node_ids = list(self.nodes.keys())
+        coords = [self.nodes[node_id] for node_id in self._node_ids]
+        self._kd_tree = KDTree(coords)
