@@ -53,68 +53,194 @@ class AStar(Algorithm):
         return count_node, None
 
 class BidirectionalAStar(Algorithm):
-    def __init__(self, heuristic, graph = None):
+    def __init__(self, heuristic, graph=None):
         super().__init__()
         self.heuristic = heuristic
         self.graph = graph
-        self.lock = threading.Lock()
-        self.found = threading.Event()
-        self.meeting_point = None
-        self.path_start = []
-        self.path_goal = []
-
+        
     def run(self, start, goal, graph):
-        self.queue_start = PriorityQueue()
-        self.queue_goal = PriorityQueue()
-
-        count_node_1 = [0]
-        count_node_2 = [0]
+        # Trường hợp đặc biệt
+        if start == goal:
+            return 0, [start]
+            
+        # Khởi tạo các priority queue với giá trị f
+        open_start = PriorityQueue()
+        open_goal = PriorityQueue()
         
-        self.came_from_start = {}
-        self.came_from_goal = {}
+        # Đếm số node được mở
+        count_node = 0
         
-        self.g_start = {start: 0}
-        self.g_goal = {goal: 0}
+        # Các set theo dõi node đã được đưa vào queue
+        open_set_start = {start}
+        open_set_goal = {goal}
         
-        self.queue_start.put((0, start))
-        self.queue_goal.put((0, goal))
+        # Các set theo dõi node đã xử lý
+        closed_start = set()
+        closed_goal = set()
         
-        t1 = threading.Thread(target=self.expand, args=(count_node_1, goal, self.queue_start, self.came_from_start, self.g_start, self.g_goal, graph))
-        t2 = threading.Thread(target=self.expand, args=(count_node_2, start, self.queue_goal, self.came_from_goal, self.g_goal, self.g_start, graph))
+        # Các map lưu đường đi
+        came_from_start = {}
+        came_from_goal = {}
         
-        t1.start()
-        t2.start()
+        # G-scores
+        g_start = {start: 0}
+        g_goal = {goal: 0}
         
-        t1.join()
-        t2.join()
+        # F-scores
+        f_start = {start: self.heuristic(start, goal)}
+        f_goal = {goal: self.heuristic(goal, start)}
         
-        if self.meeting_point:
-            path_start = self.reconstruct_path(start, self.meeting_point, self.came_from_start)
-            path_goal = self.reconstruct_path(goal, self.meeting_point, self.came_from_goal)[::-1]
-            return count_node_1[0] + count_node_2[0], path_start + path_goal
+        # Đưa các node khởi đầu vào queue
+        open_start.put((f_start[start], start))
+        open_goal.put((f_goal[goal], goal))
+        
+        # Biến lưu kết quả tốt nhất
+        best_node = None
+        best_path_cost = float('inf')
+        
+        # Điều kiện μ cho consistent bound
+        mu = float('inf')
+        
+        # Chọn hướng tìm kiếm dựa trên kích thước của các hàng đợi
+        while not open_start.empty() and not open_goal.empty():
+            # Kiểm tra điều kiện dừng: nếu μ nhỏ hơn f_min của cả hai hướng
+            f_min_start = open_start.queue[0][0] if not open_start.empty() else float('inf')
+            f_min_goal = open_goal.queue[0][0] if not open_goal.empty() else float('inf')
+            
+            if mu <= f_min_start + f_min_goal:
+                break
+                
+            # Quyết định hướng tiếp theo dựa trên kích thước của hàng đợi
+            # Ưu tiên hướng có ít nút trong hàng đợi hơn để cân bằng tìm kiếm
+            if len(open_set_start) <= len(open_set_goal):
+                count_node += self._expand_forward(open_start, open_set_start, closed_start, 
+                                              g_start, f_start, came_from_start,
+                                              open_set_goal, closed_goal, g_goal,
+                                              start, goal, graph, best_path_cost, mu)
+            else:
+                count_node += self._expand_backward(open_goal, open_set_goal, closed_goal, 
+                                               g_goal, f_goal, came_from_goal,
+                                               open_set_start, closed_start, g_start,
+                                               start, goal, graph, best_path_cost, mu)
+            
+            # Cập nhật best_path_cost và best_node sau mỗi lần mở rộng
+            for node in open_set_start & open_set_goal:
+                if node in g_start and node in g_goal:
+                    path_cost = g_start[node] + g_goal[node]
+                    if path_cost < best_path_cost:
+                        best_path_cost = path_cost
+                        best_node = node
+                        mu = path_cost
+        
+        # Tạo đường đi kết quả
+        if best_node:
+            path_start = self.reconstruct_path(start, best_node, came_from_start)
+            path_goal = self.reconstruct_path(goal, best_node, came_from_goal)[::-1]
+            
+            # Loại bỏ nút trùng
+            if len(path_goal) > 0:
+                path_goal = path_goal[1:]
+                
+            return count_node, path_start + path_goal
         else:
             print("No path found")
-        return count_node_1[0] + count_node_2[0], None
-    
-    def expand(self, count_node, goal, queue, came_from, g_score, other_g_score, graph):
-       while not queue.empty() and not self.found.is_set():
-            count_node[0] += 1
-            _, curr = queue.get()
+            return count_node, None
             
-            if curr in other_g_score:
-                with self.lock:
-                    if not self.found.is_set():
-                        self.found.set()
-                        self.meeting_point = curr
-                return
+    def _expand_forward(self, open_queue, open_set, closed, g_score, f_score, came_from,
+                       other_open_set, other_closed, other_g_score,
+                       start, goal, graph, best_cost, mu):
+        """Mở rộng tìm kiếm từ phía start."""
+        if open_queue.empty():
+            return 0
             
-            for neighbor in graph.neighbors(curr):
-                ten_g_score = g_score[curr] + graph.cost(curr, neighbor)
-                if neighbor not in g_score or ten_g_score < g_score[neighbor]:
-                    came_from[neighbor] = curr
-                    g_score[neighbor] = ten_g_score
-                    queue.put((ten_g_score + self.heuristic(neighbor, goal), neighbor))
-
+        # Lấy node có f nhỏ nhất
+        _, current = open_queue.get()
+        open_set.remove(current)
+        
+        # Nếu node đã xử lý rồi, bỏ qua
+        if current in closed:
+            return 1
+            
+        # Thêm vào tập đã xử lý
+        closed.add(current)
+        
+        # Nếu đã tìm thấy đường đi tốt hơn rồi, bỏ qua
+        if current in other_g_score and g_score[current] + other_g_score[current] >= mu:
+            return 1
+            
+        # Mở rộng các node kề
+        for neighbor in graph.neighbors(current):
+            # Bỏ qua nếu đã xử lý
+            if neighbor in closed:
+                continue
+                
+            # Tính g mới
+            tentative_g = g_score[current] + graph.cost(current, neighbor)
+            
+            # Cập nhật nếu tốt hơn
+            if neighbor not in g_score or tentative_g < g_score[neighbor]:
+                came_from[neighbor] = current
+                g_score[neighbor] = tentative_g
+                f_score[neighbor] = tentative_g + self.heuristic(neighbor, goal)
+                
+                # Kiểm tra điều kiện pruning
+                if neighbor in other_g_score and tentative_g + other_g_score[neighbor] < mu:
+                    mu = tentative_g + other_g_score[neighbor]
+                
+                # Thêm vào queue nếu chưa có
+                if neighbor not in open_set:
+                    open_queue.put((f_score[neighbor], neighbor))
+                    open_set.add(neighbor)
+                    
+        return 1
+        
+    def _expand_backward(self, open_queue, open_set, closed, g_score, f_score, came_from,
+                        other_open_set, other_closed, other_g_score,
+                        start, goal, graph, best_cost, mu):
+        """Mở rộng tìm kiếm từ phía goal."""
+        if open_queue.empty():
+            return 0
+            
+        # Lấy node có f nhỏ nhất
+        _, current = open_queue.get()
+        open_set.remove(current)
+        
+        # Nếu node đã xử lý rồi, bỏ qua
+        if current in closed:
+            return 1
+            
+        # Thêm vào tập đã xử lý
+        closed.add(current)
+        
+        # Nếu đã tìm thấy đường đi tốt hơn rồi, bỏ qua
+        if current in other_g_score and g_score[current] + other_g_score[current] >= mu:
+            return 1
+            
+        # Mở rộng các node kề
+        for neighbor in graph.neighbors(current):
+            # Bỏ qua nếu đã xử lý
+            if neighbor in closed:
+                continue
+                
+            # Tính g mới
+            tentative_g = g_score[current] + graph.cost(current, neighbor)
+            
+            # Cập nhật nếu tốt hơn
+            if neighbor not in g_score or tentative_g < g_score[neighbor]:
+                came_from[neighbor] = current
+                g_score[neighbor] = tentative_g
+                f_score[neighbor] = tentative_g + self.heuristic(neighbor, start)
+                
+                # Kiểm tra điều kiện pruning
+                if neighbor in other_g_score and tentative_g + other_g_score[neighbor] < mu:
+                    mu = tentative_g + other_g_score[neighbor]
+                
+                # Thêm vào queue nếu chưa có
+                if neighbor not in open_set:
+                    open_queue.put((f_score[neighbor], neighbor))
+                    open_set.add(neighbor)
+                    
+        return 1
 
 class Greedy(Algorithm):
     def __init__(self, heuristic, graph = None):

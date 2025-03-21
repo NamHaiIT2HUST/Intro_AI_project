@@ -26,10 +26,11 @@ class Graph:
         return [v for v, _ in self.adj_list.get(node, [])]
 
     def cost(self, u, v):
-        for neighbor, cost in self.adj_list[u]:
+        for neighbor, cost in self.adj_list.get(u, []):
             if neighbor == v:
                 return cost
-        return float('inf')  # nếu không tồn tại
+        return float('inf')
+
 
     def heuristic(self, u, v):
         lat1, lon1 = self.nodes[u]
