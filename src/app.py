@@ -9,9 +9,9 @@ import threading
 
 
 class App(customtkinter.CTk):
-    APP_NAME = "Map View - Bách Khoa"
-    CENTER_LAT, CENTER_LON = 20.46915, 106.03455
-    source_path = "/intro_ai/res/map5.osm"
+    APP_NAME = "Map View - Kim Mã, Ba Đình"
+    CENTER_LAT, CENTER_LON = 21.03065, 105.824265
+    source_path = "/Intro_AI/res/KimMa-BaDinh.osm"
     ALGORITHMS = {
         "A*": lambda self: AStar(self.distance),
         "Dijkstra": lambda _: Dijkstra(),
