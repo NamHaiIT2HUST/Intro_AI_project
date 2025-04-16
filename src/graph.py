@@ -8,6 +8,9 @@ class Graph:
         self.nodes = {}  # node_id -> (lat, lon)
         self.adj_list = {}  # node_id -> list of (neighbor_id, cost)
         self.edges = []  # (u, v, cost) cho Bellman-Ford
+        
+        self.obstacles=set() # tap hop cac node_id la vat can
+        self.blocked_edges=set() # (u,v) la canh bi chan
 
         self._kd_tree = None  # KDTree for nearest neighbor search
         self._node_ids = []  # list of node ids for KDTree
@@ -18,14 +21,22 @@ class Graph:
         self.kd_tree = None  # Reset KDTree when adding a new node
         self._node_ids.append(node_id)
 
+    #Ham them vat can
+    def add_obstacle(self,node_id):
+        self.obstacles.add(node_id)
+
     def add_edge(self, u, v, cost):
+        if u in self.obstacles or v in self.obstacles:
+            return # Khong them canh neu u va v la vat can
         self.adj_list[u].append((v, cost))
         self.edges.append((u, v, cost))
 
     def neighbors(self, node):
-        return [v for v, _ in self.adj_list.get(node, [])]
+        return [v for v, _ in self.adj_list.get(node, []) if v not in self.obstacles and (node,v) not in self.blocked_edges]
 
     def cost(self, u, v):
+        if v in self.obstacles or (u,v) in self.blocked_edges:
+            return float('inf')
         for neighbor, cost in self.adj_list.get(u, []):
             if neighbor == v:
                 return cost
@@ -78,6 +89,8 @@ class Graph:
                 candidates = []
                 for idx in idxs:
                     node_id = self._node_ids[idx]
+                    if node_id in self.obstacles:
+                        continue
                     node_lat, node_lon = self.nodes[node_id]
                     distance_m = geodesic((lat, lon), (node_lat, node_lon)).meters
                     candidates.append((distance_m, node_id))
@@ -93,3 +106,21 @@ class Graph:
         self._node_ids = list(self.nodes.keys())
         coords = [self.nodes[node_id] for node_id in self._node_ids]
         self._kd_tree = KDTree(coords)
+
+
+#------------Bo sung them----------------
+
+    def remove_obstacle(self, node_id):
+        self.obstacles.discard(node_id)     # Xoa vat can
+
+    def is_obstacle(self,node_id):
+        return node_id in self.obstacles    # kiem tra co phai vat can hay khong 
+
+    def block_edge(self, u,v):
+        self.blocked_edges.add((u,v))         # Chan canh tu u den v - duong cam
+
+    def unblock_edge(self, u,v):
+        self.blocked_edges.discard((u,v))       # mo lai canh u->v
+
+    def is_blocked_edge(self, u,v):
+        return (u,v) in self.blocked_edges      # Kiem tra canh co bi chan khong 
