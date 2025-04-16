@@ -249,6 +249,8 @@ class Greedy(Algorithm):
         self.heuristic = heuristic
 
     def run(self, start, goal, graph):
+        if start in graph.obstacles or goal in graph.obstacles:
+            return 0, None # kiem tra dau vao va dich
         count_node = 0
         open_set = PriorityQueue()
         open_set.put((0, start))
@@ -270,6 +272,8 @@ class Dijkstra(Algorithm):
         self.graph = graph
     
     def run(self, start, goal, graph):
+        if start in graph.obstacles or goal in graph.obstacles:
+            return 0, None
         count_node = 0
         came_from = {}
         open_set = PriorityQueue()
@@ -297,6 +301,8 @@ class BFS(Algorithm):
         self.graph = graph
     
     def run(self, start, goal, graph):
+        if start in graph.obstacles or goal in graph.obstacles:
+            return 0, None
         count_node = 0
         came_from = {}
         open_set = Queue()
@@ -320,6 +326,8 @@ class DFS(Algorithm):
         self.graph = graph
     
     def run(self, start, goal, graph):
+        if start in graph.obstacles or goal in graph.obstacles:
+            return 0, None
         count_node = 0
         came_from = {}
         open_set = []
@@ -343,6 +351,8 @@ class BellmanFord(Algorithm):
         self.graph = graph
     
     def run(self, start, goal, graph):
+        if start in graph.obstacles or goal in graph.obstacles:
+            return 0, None
         count_node = 0
         dist = {node: float('inf') for node in graph.nodes}
         prev = {node: None for node in graph.nodes}
@@ -350,15 +360,19 @@ class BellmanFord(Algorithm):
 
         for _ in range(len(graph.nodes) - 1):
             for edge in graph.edges:
-                count_node += 1
                 u, v, w = edge
+                if u in graph.obstacles or v in graph.obstacles or (u, v) in graph.blocked_edges:
+                    continue  # Bỏ qua cạnh này
+                count_node += 1
                 if dist[u] + w < dist[v]:
                     dist[v] = dist[u] + w
                     prev[v] = u
             
         for edge in graph.edges:
-            count_node += 1
             u, v, w = edge
+            if u in graph.obstacles or v in graph.obstacles or (u, v) in graph.blocked_edges:
+                continue  # Bỏ qua cạnh này
+            count_node += 1
             if dist[u] + w < dist[v]:
                 return None
             
