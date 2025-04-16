@@ -126,7 +126,7 @@ class App(customtkinter.CTk):
             command=self.toggle_construction_mode
         )
         self.construction_button.pack(pady=10)
-        
+
         self.clear_button = customtkinter.CTkButton(
             self.panel, 
             text="Xoá chọn", 
@@ -162,9 +162,14 @@ class App(customtkinter.CTk):
         self.time_label.pack(pady=5, anchor="w")
         
     def toggle_obstacle_mode(self):
-        print("Chế độ vật cản được kích hoạt")
+        """Kích hoạt chế độ đặt vật cản"""
+        self.map_widget.canvas.bind("<Button-1>", self.set_obstacle)
+        self.status_label.configure(text="Chế độ đặt vật cản: Đang hoạt động", text_color="orange")
+
     def toggle_construction_mode(self):
-        print("Chế độ đường cấm được kích hoạt")
+        """Kích hoạt chế độ thêm đoạn đường đang sửa"""
+        self.map_widget.canvas.bind("<Button-1>", self.set_construction)
+        self.status_label.configure(text="Chế độ thêm đoạn đường sửa: Đang hoạt động", text_color="orange")
         
     def _initialize_map(self):
         self.map_widget.set_position(self.CENTER_LAT, self.CENTER_LON)
