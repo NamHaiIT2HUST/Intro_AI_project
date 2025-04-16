@@ -35,6 +35,8 @@ class App(customtkinter.CTk):
         self.markers = []
         self.path_line = None
         self.loading_indicator = None
+        self.obstacles = []  # Danh sách các vật cản
+        self.under_construction = []  # Danh sách các đoạn đường đang sửa
         self.g = None  # Sẽ được tải trong phương thức load_graph
 
         # Thiết lập giao diện và bản đồ
@@ -144,6 +146,21 @@ class App(customtkinter.CTk):
         )
         self.time_label.pack(pady=5, anchor="w")
         
+        # Thêm button để đặt vật cản
+        self.obstacle_button = customtkinter.CTkButton(
+            self.panel, 
+            text="Đặt Vật Cản", 
+            command=self.toggle_obstacle_mode
+        )
+        self.obstacle_button.pack(pady=10)
+
+        # Thêm button để thêm đoạn đường đang sửa
+        self.construction_button = customtkinter.CTkButton(
+            self.panel, 
+            text="Thêm Đoạn Đường Sửa", 
+            command=self.toggle_construction_mode
+        )
+        self.construction_button.pack(pady=10)
 
     def _initialize_map(self):
         self.map_widget.set_position(self.CENTER_LAT, self.CENTER_LON)
