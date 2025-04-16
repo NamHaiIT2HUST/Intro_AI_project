@@ -111,7 +111,22 @@ class App(customtkinter.CTk):
             state="disabled"
         )
         self.run_button.pack(pady=padding*2)
+        # Thêm button để đặt vật cản
+        self.obstacle_button = customtkinter.CTkButton(
+            self.panel, 
+            text="Đặt Vật Cản", 
+            command=self.toggle_obstacle_mode
+        )
+        self.obstacle_button.pack(pady=10)
 
+        # Thêm button để thêm đoạn đường đang sửa
+        self.construction_button = customtkinter.CTkButton(
+            self.panel, 
+            text="Thêm Đoạn Đường Sửa", 
+            command=self.toggle_construction_mode
+        )
+        self.construction_button.pack(pady=10)
+        
         self.clear_button = customtkinter.CTkButton(
             self.panel, 
             text="Xoá chọn", 
@@ -146,22 +161,11 @@ class App(customtkinter.CTk):
         )
         self.time_label.pack(pady=5, anchor="w")
         
-        # Thêm button để đặt vật cản
-        self.obstacle_button = customtkinter.CTkButton(
-            self.panel, 
-            text="Đặt Vật Cản", 
-            command=self.toggle_obstacle_mode
-        )
-        self.obstacle_button.pack(pady=10)
-
-        # Thêm button để thêm đoạn đường đang sửa
-        self.construction_button = customtkinter.CTkButton(
-            self.panel, 
-            text="Thêm Đoạn Đường Sửa", 
-            command=self.toggle_construction_mode
-        )
-        self.construction_button.pack(pady=10)
-
+    def toggle_obstacle_mode(self):
+        print("Chế độ vật cản được kích hoạt")
+    def toggle_construction_mode(self):
+        print("Chế độ đường cấm được kích hoạt")
+        
     def _initialize_map(self):
         self.map_widget.set_position(self.CENTER_LAT, self.CENTER_LON)
         self.map_widget.set_zoom(17)
