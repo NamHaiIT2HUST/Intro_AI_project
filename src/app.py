@@ -259,6 +259,19 @@ class App(customtkinter.CTk):
             for u, v, data in self.g.edges(data=True):
                 self.graph.add_edge(u, v, data['length'])
             
+            # Thêm thông tin về đường một chiều, cấm, và vật cản tạm thời
+            for u, v, data in self.g.edges(data=True):
+                access = data.get('access')
+                highway = data.get('highway')
+
+                if access == 'no' or highway == 'construction':
+                    continue
+
+                length = data.get('length', 1)
+                oneway = data.get('oneway', False)
+                self.graph.add_edge(u, v, length)
+                if not oneway:
+                    self.graph.add_edge(v, u, length)
             # Cập nhật giao diện sau khi tải xong
             self.after(0, self.on_graph_loaded)
         except Exception as e:
@@ -268,6 +281,7 @@ class App(customtkinter.CTk):
                 text=f"Lỗi tải bản đồ: {str(e)[:50]}...", 
                 text_color="red"
             ))
+
     
     def on_graph_loaded(self):
         self.status_label.configure(text="Bản đồ đã sẵn sàng", text_color="green")
@@ -357,6 +371,9 @@ class App(customtkinter.CTk):
 
     @lru_cache(maxsize=1024)
     def distance(self, u, v):
+        # Kiểm tra xem có vật cản (đường cấm hoặc đang sửa) giữa u và v hay không
+        if not self.graph.has_edge(u, v) or self.graph.edge_is_blocked(u, v):
+            return float('inf')  # Trả về vô cùng nếu đoạn đường bị cấm hoặc đang sửa
         """Tính khoảng cách giữa hai nút, với cache để tăng hiệu suất"""
         return self.graph.heuristic(u, v)  # Sử dụng hàm heuristic của đồ thị
         
