@@ -11,6 +11,7 @@ class Graph:
         
         self.obstacles=set() # tap hop cac node_id la vat can
         self.blocked_edges=set() # (u,v) la canh bi chan
+        self._removed_edges={}  # node_id->list of(u,v,cost)
 
         self._kd_tree = None  # KDTree for nearest neighbor search
         self._node_ids = []  # list of node ids for KDTree
@@ -21,9 +22,6 @@ class Graph:
         self.kd_tree = None  # Reset KDTree when adding a new node
         self._node_ids.append(node_id)
 
-    #Ham them vat can
-    def add_obstacle(self,node_id):
-        self.obstacles.add(node_id)
 
     def add_edge(self, u, v, cost):
         if u in self.obstacles or v in self.obstacles:
@@ -110,8 +108,45 @@ class Graph:
 
 #------------Bo sung them----------------
 
+    #Ham them vat can
+    def add_obstacle(self,node_id):
+        """Đánh dấu node là vật cản và loại bỏ các cạnh liên quan"""
+        if node_id not in self.nodes:
+            raise ValueError(f"Node {node_id} không tồn tại.")
+        self.obstacles.add(node_id)
+        removed=[] # danh sach cac canh bi xoa
+        #Xóa các cạnh đi từ node này
+        for v, cost in self.adj_list.get(node_id,[]):
+            removed.append((node_id,v,cost))
+        if node_id in self.adj_list:
+            self.adj_list[node_id]=[]
+        #Xoa cac canh den node_id
+        for u in self.adj_list:
+            new_neighbors=[]
+            for v,cost in self.adj_list[u]:
+                if v==node_id:
+                    removed.append((u,v,cost))
+                else:
+                    new_neighbors.append((v,cost))
+            self.adj_list[u]=new_neighbors
+        #Xoa cac canh lien quan trong self.edges
+        self.edges=[(u,v,c) for (u,v,c) in self.edges if u!=node_id and v!=node_id]
+        #Luu lai cac canh da bi loai bo
+        self._removed_edges[node_id]=removed
+        self._kd_tree=None  # reset neu dung KDTree
+
+
     def remove_obstacle(self, node_id):
+        """Go node khoi danh sach va khoi phuc lai cac canh da xoa """
         self.obstacles.discard(node_id)     # Xoa vat can
+        if node_id in self._removed_edges:
+            for u,v,cost in self._removed_edges[node_id]:
+                if u in self.nodes and v in self.nodes:
+                    if not any(v2 == v for v2,_ in self.adj_list[u]):
+                        self.adj_list[u].append((v,cost))
+                        self.edges.append((u,v,cost))
+            del self._removed_edges[node_id]
+        self._kd_tree= None
 
     def is_obstacle(self,node_id):
         return node_id in self.obstacles    # kiem tra co phai vat can hay khong 
