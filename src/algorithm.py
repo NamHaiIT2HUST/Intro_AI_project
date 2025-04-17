@@ -44,6 +44,9 @@ class AStar(Algorithm):
             if current == goal:
                 return count_node, self.reconstruct_path(start, goal, came_from)
             for neighbor in graph.neighbors(current):
+                if neighbor in graph.obstacles or (current, neighbor) in graph.blocked_edges:
+                    continue
+
                 tentative_g_score = g_score[current] + graph.cost(current, neighbor)
                 if tentative_g_score < g_score.get(neighbor, float('inf')):
                     came_from[neighbor] = current
@@ -60,6 +63,9 @@ class BidirectionalAStar(Algorithm):
         
     def run(self, start, goal, graph):
         # Trường hợp đặc biệt
+        if start in graph.obstacles or goal in graph.obstacles:
+            return 0, None
+
         if start == goal:
             return 0, [start]
             
@@ -170,6 +176,10 @@ class BidirectionalAStar(Algorithm):
             
         # Mở rộng các node kề
         for neighbor in graph.neighbors(current):
+            #Kiem tra vat can, duong cam
+            if neighbor in graph.obstacles or (current, neighbor) in graph.blocked_edges:
+                continue
+
             # Bỏ qua nếu đã xử lý
             if neighbor in closed:
                 continue
@@ -218,6 +228,9 @@ class BidirectionalAStar(Algorithm):
             
         # Mở rộng các node kề
         for neighbor in graph.neighbors(current):
+            #Kiem tra vat can, duong cam
+            if neighbor in graph.obstacles or (current, neighbor) in graph.blocked_edges:
+                continue
             # Bỏ qua nếu đã xử lý
             if neighbor in closed:
                 continue
@@ -261,6 +274,9 @@ class Greedy(Algorithm):
             if current == goal:
                 return count_node, self.reconstruct_path(start, goal, came_from)
             for neighbor in graph.neighbors(current):
+                if neighbor in graph.obstacles or (current, neighbor) in graph.blocked_edges:
+                    continue
+
                 if neighbor not in came_from:
                     came_from[neighbor] = current
                     open_set.put((graph.heuristic(neighbor, goal), neighbor))
@@ -288,6 +304,9 @@ class Dijkstra(Algorithm):
             if current == goal:
                 return count_node, self.reconstruct_path(start, goal, came_from)
             for neighbor in graph.neighbors(current):
+                if neighbor in graph.obstacles or (current, neighbor) in graph.blocked_edges:
+                    continue
+
                 tentative_g_score = g_score[current] + graph.cost(current, neighbor)
                 if tentative_g_score < g_score.get(neighbor, float('inf')):
                     came_from[neighbor] = current
@@ -315,6 +334,9 @@ class BFS(Algorithm):
             if current == goal:
                 return count_node, self.reconstruct_path(start, goal, came_from)
             for neighbor in graph.neighbors(current):
+                if neighbor in graph.obstacles or (current, neighbor) in graph.blocked_edges:
+                    continue
+
                 if neighbor not in came_from:
                     came_from[neighbor] = current
                     open_set.put(neighbor)
@@ -340,6 +362,9 @@ class DFS(Algorithm):
             if current == goal:
                 return count_node, self.reconstruct_path(start, goal, came_from)
             for neighbor in graph.neighbors(current):
+                if neighbor in graph.obstacles or (current, neighbor) in graph.blocked_edges:
+                    continue
+
                 if neighbor not in came_from:
                     came_from[neighbor] = current
                     open_set.append(neighbor)
