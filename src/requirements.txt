@@ -1,0 +1,6 @@
+tkintermapview==1.29
+customtkinter==5.2.2
+osmnx==2.0.1
+scipy==1.14.1
+geopy=2.4.1
+
