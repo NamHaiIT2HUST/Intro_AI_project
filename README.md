@@ -5,11 +5,11 @@
 - **Trần Ngọc Huyền** - 2023xxxx
 - **Nguyễn Đào Nam Hải** - 2023xxxx
 - **Lê Quốc Dũng** - 2023xxxx
-- **Nguyễn Phương Uyên** - 2023xxxx
+- **Đặng Phương Uyên** - 2023xxxx
 
 Dự án được ra đời với mục tiêu hỗ trợ hiểu về thuật toán và cách ứng dụng thuật toán trong các bài toán thực tế
 
-Chúng tôi hoan nghên sự đóng góp của người dùng và các nhà phát triển khác để phát triển, tối ưu và khắc phục thuật toán
+Chúng tôi hoan nghênh sự đóng góp của người dùng và các nhà phát triển khác để phát triển, tối ưu và khắc phục thuật toán
 
 
 ## 🐍 Công nghệ sử dụng
