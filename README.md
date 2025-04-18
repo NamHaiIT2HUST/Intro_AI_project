@@ -1,4 +1,4 @@
-# Tìm đường đi trong mê cung có đích bằng các giải thuật tìm kiếm
+# Tìm đường đi trong lược đồ bằng các giải thuật tìm kiếm
 ## 👥 Về nhóm phát triển
 **Project tìm đường đi trên lược đồ được mô phỏng** được phát triển bởi 5 sinh viên Đại học Bách Khoa Hà Nội:
 - **Đào Trọng Nguyên** - 20235390
