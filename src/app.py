@@ -50,6 +50,7 @@ class App(customtkinter.CTk):
         self.load_map_thread.start()
 
     def _setup_ui(self):
+        """Thiết lập giao diện người dùng"""
         self.flag = [False]  # Biến để theo dõi trạng thái của nút
         # Tạo layout chính
         self.grid_columnconfigure(0, weight=5)
@@ -154,6 +155,7 @@ class App(customtkinter.CTk):
         self.time_label.pack(pady=5, anchor="w")
 
     def _initialize_map(self):
+        """Khởi tạo bản đồ với các thuộc tính mặc định"""
         self.map_widget.set_position(self.CENTER_LAT, self.CENTER_LON)
         self.map_widget.set_zoom(16)
         self.map_widget.add_right_click_menu_command("Đặt điểm đầu", self.set_start_marker)
@@ -167,6 +169,7 @@ class App(customtkinter.CTk):
             self.map_widget.canvas.unbind(event)
 
     def on_map_click(self, event):
+        """Xử lý sự kiện nhấp chuột trên bản đồ"""
         # Nếu đã có cả điểm đầu và điểm đích, không cho phép thêm điểm mới
         if self.start_node and self.goal_node:
             return None
@@ -199,6 +202,7 @@ class App(customtkinter.CTk):
         self.update_run_button()
     
     def set_start_marker(self, coords):
+        """Thiết lập marker cho điểm đầu"""
         if self.start_node:
             # Xóa marker cũ nếu đã có
             for marker in self.markers:
@@ -222,6 +226,7 @@ class App(customtkinter.CTk):
         self.update_run_button()
     
     def set_goal_marker(self, coords):
+        """Thiết lập marker cho điểm đích"""
         if self.goal_node:
             # Xóa marker cũ nếu đã có
             for marker in self.markers:
@@ -250,12 +255,14 @@ class App(customtkinter.CTk):
             self.map_widget.canvas.itemconfig(marker.canvas_id, fill=color)
     
     def update_run_button(self):
+        """Cập nhật trạng thái của nút tìm đường"""
         if self.start_node and self.goal_node and self.g:
             self.run_button.configure(state="normal")
         else:
             self.run_button.configure(state="disabled")
 
     def load_graph(self):
+        """Tải dữ liệu đồ thị từ file OSM"""
         try:
             # Tải dữ liệu đồ thị từ file OSM
             self.g = ox.graph_from_xml(self.source_path, retain_all=True, simplify=False)
@@ -278,6 +285,7 @@ class App(customtkinter.CTk):
             ))
     
     def on_graph_loaded(self):
+        """Cập nhật giao diện sau khi tải xong đồ thị"""
         self.status_label.configure(text="Bản đồ đã sẵn sàng", text_color="green")
         self.update_run_button()
     
@@ -301,6 +309,7 @@ class App(customtkinter.CTk):
         thread.start()
 
     def run_algorithm(self):
+        """Chạy thuật toán tìm đường"""
         try:
             algo_name = self.alg_selector.get()
             algorithm_creator = self.ALGORITHMS.get(algo_name)
@@ -345,6 +354,7 @@ class App(customtkinter.CTk):
         self.after(0, lambda: self.run_button.configure(state="normal"))
 
     def clear_selection(self):
+        """Xóa tất cả các marker và đường đi đã chọn"""
         for marker in self.markers:
             marker.delete()
         self.markers.clear()
@@ -382,12 +392,13 @@ class App(customtkinter.CTk):
         return total_distance
 
     def on_closing(self, event=None):
+        """Xử lý sự kiện đóng ứng dụng"""
         # Đảm bảo các luồng con dừng lại khi đóng ứng dụng
         self.quit()
         self.destroy()
 
     def draw_path(self, path, stats=None):
-        
+        """Vẽ đường đi trên bản đồ"""
         coords = [self.graph.nodes[n] for n in path]
         self.map_widget.delete_all_path()
         self.path_line = self.map_widget.set_path(coords, color="green", width=3)
@@ -399,6 +410,7 @@ class App(customtkinter.CTk):
             self.time_label.configure(text=f"Thời gian tìm kiếm: {stats.get('time', 'N/A'):.3f} ms")
 
     def check_edges_near_click(self):
+        """Kiểm tra các cạnh gần điểm đã chọn"""
         if not self.markers:
             self.status_label.configure(
                 text="Vui lòng chọn điểm trước", 
@@ -421,6 +433,7 @@ class App(customtkinter.CTk):
         self.graph.find_edges_near_point_async(lat, lon, radius=5, callback=handle_result)
 
 if __name__ == '__main__':
+    # Thiết lập chế độ giao diện cho ứng dụng
     customtkinter.set_appearance_mode("System")  # Hỗ trợ chế độ giao diện hệ thống
     customtkinter.set_default_color_theme("blue")  # Đặt chủ đề màu sắc
     

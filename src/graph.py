@@ -14,28 +14,34 @@ class Graph:
         self._node_ids = []  # list of node ids for KDTree
 
     def add_node(self, node_id, lat, lon):
+        """Thêm một node vào đồ thị với id, lat, lon"""
         self.nodes[node_id] = (lat, lon)
         self.adj_list[node_id] = []
         self.kd_tree = None  # Reset KDTree when adding a new node
         self._node_ids.append(node_id)
 
     def add_edge(self, u, v, cost):
+        """Thêm một cạnh vào đồ thị với id của 2 node và cost"""
         self.adj_list[u].append((v, cost))
         self.edges.append((u, v, cost))
 
     def neighbors(self, node):
+        """Trả về danh sách các node kề với node cho trước"""
         return [v for v, _ in self.adj_list.get(node, [])]
 
     def cost(self, u, v):
+        """Trả về cost của cạnh từ u đến v"""
         for neighbor, cost in self.adj_list.get(u, []):
             if neighbor == v:
                 return cost
         return float('inf')
 
     def heuristic(self, u, v):
+        """Trả về heuristic giữa 2 node u và v"""
         return geodesic(self.nodes[u], self.nodes[v]).meters
     
     def find_nearest_node(self, lat, lon):
+        """Tìm node gần nhất với tọa độ lat, lon"""
         nearest_node = None
         min_distance = float('inf')
 
@@ -48,9 +54,13 @@ class Graph:
         return nearest_node
     
     def has_edge(self, u, v):
+        """Kiểm tra xem có cạnh từ u đến v hay không"""
         return v in self.neighbors(u)
     
     def find_nearest_node_within_radius(self, lat, lon, initial_radius=10, step=10, max_radius=1000):
+        """
+        Tìm node gần nhất trong bán kính cho trước.
+        Nếu không tìm thấy, tăng bán kính lên theo bước cho đến khi đạt max_radius."""
         if not self._kd_tree:
             self._build_kdtree()
 
@@ -76,11 +86,15 @@ class Graph:
         return None
 
     def _build_kdtree(self):
+
         self._node_ids = list(self.nodes.keys())
         coords = [self.nodes[node_id] for node_id in self._node_ids]
         self._kd_tree = KDTree(coords)
 
     def is_point_near_segment(self, lat, lon, lat1, lon1, lat2, lon2, threshold=5):
+        """
+        Kiểm tra xem điểm (lat, lon) 
+        có gần đoạn thẳng từ (lat1, lon1) đến (lat2, lon2) trong bán kính threshold hay không."""
         x, y = radians(lon), radians(lat)
         x1, y1 = radians(lon1), radians(lat1)
         x2, y2 = radians(lon2), radians(lat2)
@@ -100,6 +114,8 @@ class Graph:
         return distance <= threshold
     
     def find_edges_near_point_async(self, lat, lon, radius=3, callback=None):
+        """
+        Tìm các cạnh gần điểm (lat, lon) trong bán kính cho trước."""
         def worker():
             results = []
             radius_deg = radius / 111320  # đổi m sang độ

@@ -7,9 +7,11 @@ class Algorithm(ABC):
 
     @abstractmethod
     def run(self, start, goal, graph):
+        """Hàm chạy thuật toán tìm đường."""
         pass
 
     def reconstruct_path(self, start, goal, came_from):
+        """Hàm tái tạo đường đi từ start đến goal dựa trên came_from."""
         path = []
         current = goal
         while current != start:
