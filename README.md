@@ -25,8 +25,8 @@ Chúng tôi hoan nghên sự đóng góp của người dùng và các nhà phá
 
 ### Các bước cài đặt
 1. Clone mã nguồn dự án
-   Link mã nguồn : https://github.com/nguyen10t2/Intro_AI
+   Link mã nguồn : 
 2. Cài đặt các thư viện cần thiết
    Bạn cần cài đặt thư viện để khởi chạy phần mềm
-   bash: pip install -r requirements.txt 
+   bash: `pip install -r requirements.txt`
 3. Tìm file run.bat để khởi chạy
