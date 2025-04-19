@@ -6,6 +6,7 @@ import time
 import osmnx as ox
 from functools import lru_cache
 import threading
+from PIL import Image, ImageTk
 
 
 class App(customtkinter.CTk):
@@ -124,7 +125,8 @@ class App(customtkinter.CTk):
         self.obstacle_button = customtkinter.CTkButton(
              self.panel, 
              text="Đặt Vật Cản", 
-             command=self.toggle_obstacle_mode
+             command=self.toggle_obstacle_mode,
+             
          )
         self.obstacle_button.pack(pady=10)   
 
@@ -444,8 +446,10 @@ class App(customtkinter.CTk):
             self.obstacles.append(node)
             self.graph.add_obstacle(node)
             self.obstacle_stack.append(node)
-
-            marker=self.map_widget.set_marker(lat,lon,text="Vật cản")
+            obstacle_icon = Image.open("res\\obstacle.png")
+            obstacle_icon = obstacle_icon.resize((30, 30),Image.Resampling.LANCZOS)
+            obstacle_icon = ImageTk.PhotoImage(obstacle_icon)
+            marker=self.map_widget.set_marker(lat,lon,text="Vật cản",icon=obstacle_icon)
             self.set_marker_color(marker,"black")
             self.markers.append(marker)
             self.map_widget.delete_all_path()
