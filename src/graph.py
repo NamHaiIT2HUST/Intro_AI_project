@@ -10,7 +10,6 @@ class Graph:
         self.edges = []  # (u, v, cost) cho Bellman-Ford
         self.node_coords = {} # Dictionary để lưu tọa độ các node (nút)
         self.obstacles=set() # tap hop cac node_id la vat can
-        self.blocked_edges=set() # (u,v) la canh bi chan
         self._removed_edges={}  # node_id->list of(u,v,cost)
 
         self._kd_tree = None  # KDTree for nearest neighbor search
@@ -31,10 +30,10 @@ class Graph:
         self.edges.append((u, v, cost))
 
     def neighbors(self, node):
-        return [v for v, _ in self.adj_list.get(node, []) if v not in self.obstacles and (node,v) not in self.blocked_edges]
+        return [v for v, _ in self.adj_list.get(node, []) if v not in self.obstacles ]
 
     def cost(self, u, v):
-        if v in self.obstacles or (u,v) in self.blocked_edges:
+        if v in self.obstacles:
             return float('inf')
         for neighbor, cost in self.adj_list.get(u, []):
             if neighbor == v:
@@ -138,11 +137,4 @@ class Graph:
     def is_obstacle(self,node_id):
         return node_id in self.obstacles    # kiem tra co phai vat can hay khong 
 
-    def block_edge(self, u,v):
-        self.blocked_edges.add((u,v))         # Chan canh tu u den v - duong cam
-
-    def unblock_edge(self, u,v):
-        self.blocked_edges.discard((u,v))       # mo lai canh u->v
-
-    def is_blocked_edge(self, u,v):
-        return (u,v) in self.blocked_edges      # Kiem tra canh co bi chan khong 
+  

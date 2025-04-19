@@ -44,7 +44,7 @@ class AStar(Algorithm):
             if current == goal:
                 return count_node, self.reconstruct_path(start, goal, came_from)
             for neighbor in graph.neighbors(current):
-                if neighbor in graph.obstacles or (current, neighbor) in graph.blocked_edges:
+                if neighbor in graph.obstacles :
                     continue
 
                 tentative_g_score = g_score[current] + graph.cost(current, neighbor)
@@ -177,7 +177,7 @@ class BidirectionalAStar(Algorithm):
         # Mở rộng các node kề
         for neighbor in graph.neighbors(current):
             #Kiem tra vat can, duong cam
-            if neighbor in graph.obstacles or (current, neighbor) in graph.blocked_edges:
+            if neighbor in graph.obstacles :
                 continue
 
             # Bỏ qua nếu đã xử lý
@@ -229,7 +229,7 @@ class BidirectionalAStar(Algorithm):
         # Mở rộng các node kề
         for neighbor in graph.neighbors(current):
             #Kiem tra vat can, duong cam
-            if neighbor in graph.obstacles or (current, neighbor) in graph.blocked_edges:
+            if neighbor in graph.obstacles :
                 continue
             # Bỏ qua nếu đã xử lý
             if neighbor in closed:
@@ -274,7 +274,7 @@ class Greedy(Algorithm):
             if current == goal:
                 return count_node, self.reconstruct_path(start, goal, came_from)
             for neighbor in graph.neighbors(current):
-                if neighbor in graph.obstacles or (current, neighbor) in graph.blocked_edges:
+                if neighbor in graph.obstacles :
                     continue
 
                 if neighbor not in came_from:
@@ -304,7 +304,7 @@ class Dijkstra(Algorithm):
             if current == goal:
                 return count_node, self.reconstruct_path(start, goal, came_from)
             for neighbor in graph.neighbors(current):
-                if neighbor in graph.obstacles or (current, neighbor) in graph.blocked_edges:
+                if neighbor in graph.obstacles :
                     continue
 
                 tentative_g_score = g_score[current] + graph.cost(current, neighbor)
@@ -334,7 +334,7 @@ class BFS(Algorithm):
             if current == goal:
                 return count_node, self.reconstruct_path(start, goal, came_from)
             for neighbor in graph.neighbors(current):
-                if neighbor in graph.obstacles or (current, neighbor) in graph.blocked_edges:
+                if neighbor in graph.obstacles :
                     continue
 
                 if neighbor not in came_from:
@@ -362,7 +362,7 @@ class DFS(Algorithm):
             if current == goal:
                 return count_node, self.reconstruct_path(start, goal, came_from)
             for neighbor in graph.neighbors(current):
-                if neighbor in graph.obstacles or (current, neighbor) in graph.blocked_edges:
+                if neighbor in graph.obstacles :
                     continue
 
                 if neighbor not in came_from:
@@ -386,7 +386,7 @@ class BellmanFord(Algorithm):
         for _ in range(len(graph.nodes) - 1):
             for edge in graph.edges:
                 u, v, w = edge
-                if u in graph.obstacles or v in graph.obstacles or (u, v) in graph.blocked_edges:
+                if u in graph.obstacles or v in graph.obstacles :
                     continue  # Bỏ qua cạnh này
                 count_node += 1
                 if dist[u] + w < dist[v]:
@@ -395,7 +395,7 @@ class BellmanFord(Algorithm):
             
         for edge in graph.edges:
             u, v, w = edge
-            if u in graph.obstacles or v in graph.obstacles or (u, v) in graph.blocked_edges:
+            if u in graph.obstacles or v in graph.obstacles :
                 continue  # Bỏ qua cạnh này
             count_node += 1
             if dist[u] + w < dist[v]:
