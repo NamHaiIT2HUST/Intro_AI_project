@@ -409,6 +409,8 @@ class App(customtkinter.CTk):
         self.markers.clear()
         self.start_node = None
         self.goal_node = None
+        self.map_widget.canvas.delete(self.region_rectangle)
+        self.region_rectangle = None
         self.map_widget.delete_all_path()
         # Đặt lại nhãn thông tin
         self.distance_label.configure(text="Khoảng cách: N/A")
