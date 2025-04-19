@@ -96,6 +96,14 @@ class App(customtkinter.CTk):
         )
         self.status_label.pack(pady=padding)
 
+        self.status_label_obstacle = customtkinter.CTkLabel(
+            self.panel,
+            text="Chế độ vật cản: Tắt",
+            font=customtkinter.CTkFont(size=12),
+            text_color="red"
+        )
+        self.status_label_obstacle.pack(pady=padding)
+
         self.alg_label = customtkinter.CTkLabel(self.panel, text="Thuật toán:")
         self.alg_label.pack(pady=(20, 5))
 
@@ -165,9 +173,9 @@ class App(customtkinter.CTk):
     def toggle_obstacle_mode(self):
         self.obstacle_mode=not getattr(self,'obstacle_mode',False)
         if self.obstacle_mode:
-            self.status_label.configure(text="Chế độ vật cản: Bật",text_color="green")
+            self.status_label_obstacle.configure(text="Chế độ vật cản: Bật",text_color="green")
         else:
-            self.status_label.configure(text="Chế độ vật cản: Tắt",text_color="red")
+            self.status_label_obstacle.configure(text="Chế độ vật cản: Tắt",text_color="red")
 
     def _initialize_map(self):
         self.map_widget.set_position(self.CENTER_LAT, self.CENTER_LON)
