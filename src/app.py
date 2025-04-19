@@ -132,7 +132,9 @@ class App(customtkinter.CTk):
         self.remove_obstacle_button=customtkinter.CTkButton(
             self.panel,
             text="Xóa vật cản",
-            command=self.remove_obstacle
+            command=self.remove_obstacle,
+            fg_color="#D35B58", 
+            hover_color="#C77C78"
         )
         self.remove_obstacle_button.pack(pady=10)
 
