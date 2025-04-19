@@ -36,6 +36,7 @@ class App(customtkinter.CTk):
         self.path_line = None
         self.loading_indicator = None
         self.g = None  # Sẽ được tải trong phương thức load_graph
+        self.obstacles=[]   #Danh sách các vật cản
 
         # Thiết lập giao diện và bản đồ
         self._setup_ui()
@@ -116,16 +117,7 @@ class App(customtkinter.CTk):
              text="Đặt Vật Cản", 
              command=self.toggle_obstacle_mode
          )
-        self.obstacle_button.pack(pady=10)
- 
-         # Thêm button để thêm đoạn đường đang sửa
-        self.blocked_edge_button = customtkinter.CTkButton(
-             self.panel, 
-             text="Thêm đường cấm", 
-             command=self.toggle_construction_mode
-         )
-        self.blocked_edge_button.pack(pady=10)
-         
+        self.obstacle_button.pack(pady=10)   
 
         self.clear_button = customtkinter.CTkButton(
             self.panel, 
@@ -162,10 +154,11 @@ class App(customtkinter.CTk):
         self.time_label.pack(pady=5, anchor="w")
         
     def toggle_obstacle_mode(self):
-         print("Chế độ vật cản được kích hoạt")
-    def toggle_construction_mode(self):
-         print("Chế độ đường cấm được kích hoạt")
-         
+        self.obstacle_mode=not getattr(self,'obstacle_mode',False)
+        if self.obstacle_mode:
+            self.status_label.configure(text="Chế độ vật cản: Bật",text_color="green")
+        else:
+            self.status_label.configure(text="Chế độ vật cản: Tắt",text_color="red")
 
     def _initialize_map(self):
         self.map_widget.set_position(self.CENTER_LAT, self.CENTER_LON)
@@ -182,9 +175,13 @@ class App(customtkinter.CTk):
 
     def on_map_click(self, event):
         # Nếu đã có cả điểm đầu và điểm đích, không cho phép thêm điểm mới
-        if self.start_node and self.goal_node:
-            return None
-        
+        # if self.start_node and self.goal_node:
+        #     return None
+        if getattr(self, 'obstacle_mode', False):
+            self.add_obstacle((event.x, event.y))
+            return
+
+
         lat, lon = self.map_widget.convert_canvas_coords_to_decimal_coords(event.x, event.y)
         
         if not self.g:
@@ -192,8 +189,8 @@ class App(customtkinter.CTk):
             
         print(f"Clicked at: {lat}, {lon}")
         node = self.find_nearest_node(lat, lon)
-        print(f"Nearest node: {node}")
-        
+        print(f"Nearest node: {node}") 
+
         marker = self.map_widget.set_marker(lat, lon)
         self.markers.append(marker)
 
@@ -418,6 +415,21 @@ class App(customtkinter.CTk):
             self.nodes_label.configure(text=f"Số nút đã duyệt: {stats.get('expanded_nodes', 'N/A')}")
             self.time_label.configure(text=f"Thời gian tìm kiếm: {stats.get('time', 'N/A'):.3f} ms")
 
+    def add_obstacle(self,coords):
+        lat,lon= self.map_widget.convert_canvas_coords_to_decimal_coords(*coords) if coords else (None,None)
+        if lat is None or lon is None:
+            return 
+        
+        node =self.find_nearest_node(lat,lon)
+        if node not in self.obstacles:
+            self.obstacles.append(node)
+            self.graph.add_obstacle(node)
+            marker=self.map_widget.set_marker(lat,lon,text="Vật cản")
+            self.set_marker_color(marker,"black")
+            self.markers.append(marker)
+
+            if self.start_node and self.goal_node:
+                self.run_algorithm_thread()
 
 if __name__ == '__main__':
     customtkinter.set_appearance_mode("System")  # Hỗ trợ chế độ giao diện hệ thống
