@@ -451,7 +451,8 @@ class App(customtkinter.CTk):
         self.graph.remove_obstacle(last_obstacle_node)
 
         #Xoa marker cua vat can tren ban do
-        for marker in self.markers:
+        for i in range(len(self.markers)-1, -1, -1):
+            marker = self.markers[i]
             if hasattr(marker,"text") and marker.text =="Vật cản":
                 self.markers.remove(marker)
                 marker.delete()
