@@ -42,21 +42,7 @@ class Graph:
 
 
     def heuristic(self, u, v):
-        lat1, lon1 = self.nodes[u]
-        lat2, lon2 = self.nodes[v]
-        return self.haversine_distance(lat1, lon1, lat2, lon2)
-    
-    def haversine_distance(self, lat1, lon1, lat2, lon2):
-        R = 6371e3  # Bán kính Trái Đất (m)
-        phi1 = radians(lat1)
-        phi2 = radians(lat2)
-        delta_phi = radians(lat2 - lat1)
-        delta_lambda = radians(lon2 - lon1)
-
-        a = sin(delta_phi / 2) ** 2 + cos(phi1) * cos(phi2) * sin(delta_lambda / 2) ** 2
-        c = 2 * atan2(sqrt(a), sqrt(1 - a))
-
-        return R * c
+        return geodesic(self.nodes[u], self.nodes[v]).meters
     
     def find_nearest_node(self, lat, lon):
         nearest_node = None
