@@ -40,6 +40,10 @@ class App(customtkinter.CTk):
         self.obstacles=[]   #Danh sách các vật cản
         self.remove_obstacle_mode= False
         self.obstacle_stack=[] # Ngan xep luu vat can
+        self.is_drawing_area = False  # Trạng thái vẽ vùng cấm
+        self.region_start_canvas_coords = None
+        self.region_rectangle = None
+
         # Thiết lập giao diện và bản đồ
         self._setup_ui()
         self._initialize_map()
@@ -130,6 +134,11 @@ class App(customtkinter.CTk):
          )
         self.obstacle_button.pack(pady=10)   
 
+        
+        
+        self.select_area_button = customtkinter.CTkButton(self.panel, text="Chọn vùng cấm", command=self.toggle_region_draw)
+        self.select_area_button.pack(pady=10)
+        
         # Them nut xoa vat can
         self.remove_obstacle_button=customtkinter.CTkButton(
             self.panel,
@@ -181,6 +190,21 @@ class App(customtkinter.CTk):
         else:
             self.status_label_obstacle.configure(text="Chế độ vật cản: Tắt",text_color="red")
 
+    def toggle_region_draw(self):
+        """Bật/tắt chế độ vẽ vùng cấm"""
+        self.is_drawing_area = not self.is_drawing_area  # Chuyển đổi trạng thái
+        if self.is_drawing_area:
+            self.select_area_button.configure(text="Hủy chọn vùng cấm")  # Thay đổi tên nút
+            # Cập nhật sự kiện để vẽ vùng cấm
+            self.map_widget.canvas.bind("<ButtonPress-3>", self.on_region_draw_start)
+            self.map_widget.canvas.bind("<B3-Motion>", self.on_region_draw_motion)
+            self.map_widget.canvas.bind("<ButtonRelease-3>", self.on_region_draw_end)
+        else:
+            self.select_area_button.configure(text="Chọn vùng cấm")  # Đặt lại tên nút
+            # Hủy bỏ các sự kiện vẽ vùng cấm
+            self.map_widget.canvas.unbind("<ButtonPress-3>")
+            self.map_widget.canvas.unbind("<B3-Motion>")
+            self.map_widget.canvas.unbind("<ButtonRelease-3>")
     def _initialize_map(self):
         self.map_widget.set_position(self.CENTER_LAT, self.CENTER_LON)
         self.map_widget.set_zoom(17)
@@ -475,9 +499,55 @@ class App(customtkinter.CTk):
         if self.start_node and self.goal_node:
             self.run_algorithm_thread()
 
-        
+    #Vung cam
+    def on_region_draw_start(self,event):
+        self.region_start_canvas_coords=(event.x,event.y)
+        self.region_rectangle=self.map_widget.canvas.create_rectangle(
+            event.x,event.y,event.x,event.y,
+            outline="red",width=2,dash=(4,2)
+        )
+    def on_region_draw_motion(self,event):
+        if(self.region_rectangle):
+            self.map_widget.canvas.coords(self.region_rectangle,
+                                         self.region_start_canvas_coords[0],
+                                         self.region_start_canvas_coords[1],
+                                         event.x,event.y)
             
+    def on_region_draw_end(self,event):
+        if self.region_rectangle:
+            # Lay toa do diem dau va cuoi , chuyen ve geo-coords
+            x1, y1 =self.region_start_canvas_coords
+            x2, y2 =event.x,event.y
 
+            lat1, lon1=self.map_widget.convert_canvas_coords_to_decimal_coords(x1,y1)
+            lat2, lon2=self.map_widget.convert_canvas_coords_to_decimal_coords(x2,y2)
+
+            lat_min, lat_max=min(lat1,lat2), max(lat1,lat2)
+            lon_min, lon_max=min(lon1,lon2), max(lon1,lon2)
+
+            for node, (n_lat,n_lon) in self.graph.node_coords.items():
+                if lat_min <= n_lat <=lat_max and lon_min <=n_lon<=lon_max:
+                    if node not in self.obstacles:
+                        self.graph.add_obstacle(node)
+                        self.obstacles.append(node)
+            
+            # Dat marker cho vung bi cam 
+            center_lat =(lat1+lat2)/2
+            center_lon=(lon1+lon2)/2
+            img = "res\\house-flood-water-solid.png"
+            img = Image.open(img)
+            img = img.resize((50, 50), Image.Resampling.LANCZOS)
+            img = ImageTk.PhotoImage(img)
+            marker = self.map_widget.set_marker(center_lat, center_lon,text="Vùng cấm", icon=img)
+            self.set_marker_color(marker,"black")            
+            self.markers.append(marker)
+
+            self.map_widget.delete_all_path()
+            if self.start_node and self.goal_node:
+                self.run_algorithm_thread()
+
+
+    
 if __name__ == '__main__':
     customtkinter.set_appearance_mode("System")  # Hỗ trợ chế độ giao diện hệ thống
     customtkinter.set_default_color_theme("blue")  # Đặt chủ đề màu sắc

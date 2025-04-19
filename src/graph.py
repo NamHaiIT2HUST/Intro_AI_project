@@ -8,7 +8,7 @@ class Graph:
         self.nodes = {}  # node_id -> (lat, lon)
         self.adj_list = {}  # node_id -> list of (neighbor_id, cost)
         self.edges = []  # (u, v, cost) cho Bellman-Ford
-        
+        self.node_coords = {} # Dictionary để lưu tọa độ các node (nút)
         self.obstacles=set() # tap hop cac node_id la vat can
         self.blocked_edges=set() # (u,v) la canh bi chan
         self._removed_edges={}  # node_id->list of(u,v,cost)
@@ -17,11 +17,12 @@ class Graph:
         self._node_ids = []  # list of node ids for KDTree
 
     def add_node(self, node_id, lat, lon):
+        
         self.nodes[node_id] = (lat, lon)
         self.adj_list[node_id] = []
         self.kd_tree = None  # Reset KDTree when adding a new node
         self._node_ids.append(node_id)
-
+        self.node_coords[node_id] = (lat, lon)
 
     def add_edge(self, u, v, cost):
         if u in self.obstacles or v in self.obstacles:
