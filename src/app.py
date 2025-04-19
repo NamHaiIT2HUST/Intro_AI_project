@@ -37,7 +37,8 @@ class App(customtkinter.CTk):
         self.loading_indicator = None
         self.g = None  # Sẽ được tải trong phương thức load_graph
         self.obstacles=[]   #Danh sách các vật cản
-
+        self.remove_obstacle_mode= False
+        self.obstacle_stack=[] # Ngan xep luu vat can
         # Thiết lập giao diện và bản đồ
         self._setup_ui()
         self._initialize_map()
@@ -118,6 +119,14 @@ class App(customtkinter.CTk):
              command=self.toggle_obstacle_mode
          )
         self.obstacle_button.pack(pady=10)   
+
+        # Them nut xoa vat can
+        self.remove_obstacle_button=customtkinter.CTkButton(
+            self.panel,
+            text="Xóa vật cản",
+            command=self.remove_obstacle
+        )
+        self.remove_obstacle_button.pack(pady=10)
 
         self.clear_button = customtkinter.CTkButton(
             self.panel, 
@@ -414,7 +423,7 @@ class App(customtkinter.CTk):
             self.distance_label.configure(text=f"Khoảng cách: {stats.get('distance', 'N/A'):.2f} m")
             self.nodes_label.configure(text=f"Số nút đã duyệt: {stats.get('expanded_nodes', 'N/A')}")
             self.time_label.configure(text=f"Thời gian tìm kiếm: {stats.get('time', 'N/A'):.3f} ms")
-
+    #Them vat can
     def add_obstacle(self,coords):
         lat,lon= self.map_widget.convert_canvas_coords_to_decimal_coords(*coords) if coords else (None,None)
         if lat is None or lon is None:
@@ -424,12 +433,35 @@ class App(customtkinter.CTk):
         if node not in self.obstacles:
             self.obstacles.append(node)
             self.graph.add_obstacle(node)
+            self.obstacle_stack.append(node)
+
             marker=self.map_widget.set_marker(lat,lon,text="Vật cản")
             self.set_marker_color(marker,"black")
             self.markers.append(marker)
-
+            self.map_widget.delete_all_path()
             if self.start_node and self.goal_node:
                 self.run_algorithm_thread()
+
+    #Xoa vat can
+    def remove_obstacle(self):
+        if not self.obstacle_stack:
+            return
+        last_obstacle_node=self.obstacle_stack.pop()
+        self.obstacles.remove(last_obstacle_node)
+        self.graph.remove_obstacle(last_obstacle_node)
+
+        #Xoa marker cua vat can tren ban do
+        for marker in self.markers:
+            if hasattr(marker,"text") and marker.text =="Vật cản":
+                self.markers.remove(marker)
+                marker.delete()
+                break; # Xoa marker cua vat can gan nhat
+        self.map_widget.delete_all_path()
+        if self.start_node and self.goal_node:
+            self.run_algorithm_thread()
+
+        
+            
 
 if __name__ == '__main__':
     customtkinter.set_appearance_mode("System")  # Hỗ trợ chế độ giao diện hệ thống
