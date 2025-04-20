@@ -1,0 +1,4 @@
+tkintermapview==1.29
+osmnx==2.0.2
+geopy==2.4.1
+scipy==1.15.2
