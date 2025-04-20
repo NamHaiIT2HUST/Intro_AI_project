@@ -40,7 +40,6 @@ class Graph:
                 return cost
         return float('inf')
 
-
     def heuristic(self, u, v):
         return geodesic(self.nodes[u], self.nodes[v]).meters
     
@@ -125,7 +124,6 @@ class Graph:
         for node_id in node_list:
             self.add_obstacle(node_id)
 
-
     def remove_obstacle(self, node_id):
         """Go node khoi danh sach va khoi phuc lai cac canh da xoa """
         self.obstacles.discard(node_id)     # Xoa vat can
@@ -137,6 +135,10 @@ class Graph:
                         self.edges.append((u,v,cost))
             del self._removed_edges[node_id]
         self._kd_tree= None
+
+    def remove_obstacles(self,node_list):
+        for node_id in node_list:
+            self.remove_obstacle(node_id)
 
     def is_obstacle(self,node_id):
         return node_id in self.obstacles    # kiem tra co phai vat can hay khong 

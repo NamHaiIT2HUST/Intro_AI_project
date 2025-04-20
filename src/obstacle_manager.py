@@ -4,6 +4,7 @@ from PIL import Image, ImageTk
 class ObstacleManager:
     def __init__(self, app):
         self.app = app
+        self.region_stacks = []
 
     def add_area_obstacles_async(self, lat1, lon1, lat2, lon2):
         threading.Thread(
@@ -18,6 +19,7 @@ class ObstacleManager:
             if lat_min <= lat <= lat_max and lon_min <= lon <= lon_max
             and not self.app.graph.is_obstacle(node)
         ]
+        self.region_stacks.append(affected)
         self.app.graph.add_obstacles(affected)
         self.app.map_widget.after(0, lambda: self._add_area_marker(lat1, lon1, lat2, lon2))
 

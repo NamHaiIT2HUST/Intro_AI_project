@@ -32,7 +32,8 @@ class AStar(Algorithm):
         count_node = 0
         open_queue = PriorityQueue()
         open_queue.put((0, start))
-        open_set = {start}
+        open_set = set()
+        open_set.add(start)
         came_from = {}
         f_score = {node: float('inf') for node in graph.nodes}
         f_score[start] = graph.heuristic(start, goal)
@@ -41,7 +42,6 @@ class AStar(Algorithm):
 
         while not open_queue.empty():
             _, current = open_queue.get()
-            open_set.remove(current)
             count_node += 1
             if current == goal:
                 return count_node, self.reconstruct_path(start, goal, came_from)
@@ -166,6 +166,8 @@ class Greedy(Algorithm):
         count_node = 0
         open_set = PriorityQueue()
         open_set.put((0, start))
+        closed = set()
+        closed.add(start)
         came_from = {}
         while not open_set.empty():
             count_node += 1
@@ -173,12 +175,13 @@ class Greedy(Algorithm):
             if current == goal:
                 return count_node, self.reconstruct_path(start, goal, came_from)
             for neighbor in graph.neighbors(current):
-                if neighbor in graph.obstacles :
-                    continue
-
+                # if neighbor in graph.obstacles:
+                #     continue
                 if neighbor not in came_from:
                     came_from[neighbor] = current
-                    open_set.put((graph.heuristic(neighbor, goal), neighbor))
+                    if neighbor not in closed:
+                        open_set.put((self.heuristic(neighbor, goal), neighbor))
+                        closed.add(neighbor)
         return count_node, None
 
 class Dijkstra(Algorithm):
@@ -205,9 +208,6 @@ class Dijkstra(Algorithm):
             if current == goal:
                 return count_node, self.reconstruct_path(start, goal, came_from)
             for neighbor in graph.neighbors(current):
-                if neighbor in graph.obstacles :
-                    continue
-
                 tentative_g_score = g_score[current] + graph.cost(current, neighbor)
                 if tentative_g_score < g_score.get(neighbor, float('inf')):
                     came_from[neighbor] = current
@@ -230,6 +230,8 @@ class BFS(Algorithm):
         open_set = Queue()
         open_set.put(start)
         came_from[start] = None
+        closed = set()
+        closed.add(start)
 
         while not open_set.empty():
             count_node += 1
@@ -237,12 +239,11 @@ class BFS(Algorithm):
             if current == goal:
                 return count_node, self.reconstruct_path(start, goal, came_from)
             for neighbor in graph.neighbors(current):
-                if neighbor in graph.obstacles :
+                if neighbor in closed:
                     continue
-
-                if neighbor not in came_from:
-                    came_from[neighbor] = current
-                    open_set.put(neighbor)
+                closed.add(neighbor)
+                came_from[neighbor] = current
+                open_set.put(neighbor)
         return count_node, None
     
 class DFS(Algorithm):
@@ -258,6 +259,8 @@ class DFS(Algorithm):
         open_set = []
         open_set.append(start)
         came_from[start] = None
+        closed = set()
+        closed.add(start)
 
         while open_set:
             count_node += 1
@@ -265,12 +268,11 @@ class DFS(Algorithm):
             if current == goal:
                 return count_node, self.reconstruct_path(start, goal, came_from)
             for neighbor in graph.neighbors(current):
-                if neighbor in graph.obstacles :
+                if neighbor in closed:
                     continue
-
-                if neighbor not in came_from:
-                    came_from[neighbor] = current
-                    open_set.append(neighbor)
+                closed.add(neighbor)
+                came_from[neighbor] = current
+                open_set.append(neighbor)
         return count_node, None
 
 class BellmanFord(Algorithm):

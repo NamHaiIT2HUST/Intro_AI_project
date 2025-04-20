@@ -78,14 +78,14 @@ class App(customtkinter.CTk):
         self.panel.grid(row=0, column=1, sticky="nsew", padx=5, pady=5)
         
         # Thiết lập các widget trong panel
-        padding = 10
+        padding = 9
         
         self.title_label = customtkinter.CTkLabel(
             self.panel, 
             text="Tìm đường đi",
             font=customtkinter.CTkFont(size=18, weight="bold")
         )
-        self.title_label.pack(pady=(20, padding))
+        self.title_label.pack(pady=(15, padding))
         
         self.instruction_label = customtkinter.CTkLabel(
             self.panel,
@@ -112,7 +112,7 @@ class App(customtkinter.CTk):
         self.status_label_obstacle.pack(pady=padding)
 
         self.alg_label = customtkinter.CTkLabel(self.panel, text="Thuật toán:")
-        self.alg_label.pack(pady=(20, 5))
+        self.alg_label.pack(pady=(5, 5))
 
         self.alg_selector = customtkinter.CTkComboBox(
             self.panel, values=list(self.ALGORITHMS.keys())
@@ -125,7 +125,7 @@ class App(customtkinter.CTk):
             command=self.run_algorithm_thread,
             state="disabled"
         )
-        self.run_button.pack(pady=padding*2)
+        self.run_button.pack(pady=padding)
 
         # Thêm button để đặt vật cản
         self.obstacle_button = customtkinter.CTkButton(
@@ -136,7 +136,13 @@ class App(customtkinter.CTk):
          )
         self.obstacle_button.pack(pady=10)   
 
-        
+        self.remove_region_button = customtkinter.CTkButton(
+            self.panel,
+            text="Xóa vùng cấm",
+            command=self.remove_last_region
+        )
+        self.remove_region_button.pack(pady=10)
+
         
         self.select_area_button = customtkinter.CTkButton(self.panel, text="Chọn vùng cấm", command=self.toggle_region_draw)
         self.select_area_button.pack(pady=10)
@@ -207,6 +213,7 @@ class App(customtkinter.CTk):
             self.map_widget.canvas.unbind("<ButtonPress-3>")
             self.map_widget.canvas.unbind("<B3-Motion>")
             self.map_widget.canvas.unbind("<ButtonRelease-3>")
+
     def _initialize_map(self):
         self.map_widget.set_position(self.CENTER_LAT, self.CENTER_LON)
         self.map_widget.set_zoom(17)
@@ -404,6 +411,7 @@ class App(customtkinter.CTk):
         self.after(0, lambda: self.run_button.configure(state="normal"))
 
     def clear_selection(self):
+        """Xóa tất cả các điểm đã chọn và đường đi"""
         for marker in self.markers:
             marker.delete()
         self.markers.clear()
@@ -434,12 +442,8 @@ class App(customtkinter.CTk):
         total_distance = 0
         for i in range(len(path) - 1):
             u, v = path[i], path[i + 1]
-            # Sử dụng độ dài cạnh từ dữ liệu gốc nếu có
-            if self.graph.has_edge(u, v):
-                total_distance += self.graph.cost(u, v)
-            else:
-                total_distance += self.distance(u, v) * 111000  # Chuyển từ độ sang mét (xấp xỉ)
-                
+            total_distance += self.distance(u, v)
+
         return total_distance
 
     def on_closing(self, event=None):
@@ -529,6 +533,25 @@ class App(customtkinter.CTk):
         self.obstacle_manager.add_area_obstacles_async(lat1, lon1, lat2, lon2)
         self.map_widget.canvas.delete(self.region_rectangle)
         self.region_rectangle = None
+
+    #Xoa vung cam
+    def remove_last_region(self):
+        if not self.obstacle_manager.region_stacks:
+            return
+        last_region = self.obstacle_manager.region_stacks.pop()  # danh sách node
+        for node in last_region:
+            self.graph.remove_obstacle(node)
+            # nếu bạn lưu marker vùng cấm, cũng cần xóa marker tương ứng ở đây
+        # Xoá đường và chạy lại thuật toán nếu cần
+        self.map_widget.delete_all_path()
+        #xóa icon vùng cấm trên bản đồ
+        for marker in self.markers:
+            if hasattr(marker, "text") and marker.text == "Vùng cấm":
+                self.markers.remove(marker)
+                marker.delete()
+                break
+        if self.start_node and self.goal_node:
+            self.run_algorithm_thread()
 
 if __name__ == '__main__':
     customtkinter.set_appearance_mode("System")  # Hỗ trợ chế độ giao diện hệ thống
