@@ -7,6 +7,7 @@ import osmnx as ox
 from functools import lru_cache
 import threading
 from PIL import Image, ImageTk
+from obstacle_manager import ObstacleManager
 
 
 class App(customtkinter.CTk):
@@ -43,6 +44,7 @@ class App(customtkinter.CTk):
         self.is_drawing_area = False  # Trạng thái vẽ vùng cấm
         self.region_start_canvas_coords = None
         self.region_rectangle = None
+        self.obstacle_manager = ObstacleManager(self)
 
         # Thiết lập giao diện và bản đồ
         self._setup_ui()
@@ -459,6 +461,7 @@ class App(customtkinter.CTk):
             self.distance_label.configure(text=f"Khoảng cách: {stats.get('distance', 'N/A'):.2f} m")
             self.nodes_label.configure(text=f"Số nút đã duyệt: {stats.get('expanded_nodes', 'N/A')}")
             self.time_label.configure(text=f"Thời gian tìm kiếm: {stats.get('time', 'N/A'):.3f} ms")
+            
     #Them vat can
     def add_obstacle(self,coords):
         lat,lon= self.map_widget.convert_canvas_coords_to_decimal_coords(*coords) if coords else (None,None)
@@ -506,48 +509,25 @@ class App(customtkinter.CTk):
             event.x,event.y,event.x,event.y,
             outline="red",width=2,dash=(4,2)
         )
+        
     def on_region_draw_motion(self,event):
         if(self.region_rectangle):
             self.map_widget.canvas.coords(self.region_rectangle,
                                          self.region_start_canvas_coords[0],
                                          self.region_start_canvas_coords[1],
                                          event.x,event.y)
-            
-    def on_region_draw_end(self,event):
-        if self.region_rectangle:
-            # Lay toa do diem dau va cuoi , chuyen ve geo-coords
-            x1, y1 =self.region_start_canvas_coords
-            x2, y2 =event.x,event.y
-
-            lat1, lon1=self.map_widget.convert_canvas_coords_to_decimal_coords(x1,y1)
-            lat2, lon2=self.map_widget.convert_canvas_coords_to_decimal_coords(x2,y2)
-
-            lat_min, lat_max=min(lat1,lat2), max(lat1,lat2)
-            lon_min, lon_max=min(lon1,lon2), max(lon1,lon2)
-
-            for node, (n_lat,n_lon) in self.graph.node_coords.items():
-                if lat_min <= n_lat <=lat_max and lon_min <=n_lon<=lon_max:
-                    if node not in self.obstacles:
-                        self.graph.add_obstacle(node)
-                        self.obstacles.append(node)
-            
-            # Dat marker cho vung bi cam 
-            center_lat =(lat1+lat2)/2
-            center_lon=(lon1+lon2)/2
-            img = "res\\house-flood-water-solid.png"
-            img = Image.open(img)
-            img = img.resize((50, 50), Image.Resampling.LANCZOS)
-            img = ImageTk.PhotoImage(img)
-            marker = self.map_widget.set_marker(center_lat, center_lon,text="Vùng cấm", icon=img)
-            self.set_marker_color(marker,"black")            
-            self.markers.append(marker)
-
-            self.map_widget.delete_all_path()
-            if self.start_node and self.goal_node:
-                self.run_algorithm_thread()
-
-
     
+    def on_region_draw_end(self, event):
+        if not self.region_rectangle:
+            return
+
+        x1, y1 = self.region_start_canvas_coords
+        x2, y2 = event.x, event.y
+        lat1, lon1 = self.map_widget.convert_canvas_coords_to_decimal_coords(x1, y1)
+        lat2, lon2 = self.map_widget.convert_canvas_coords_to_decimal_coords(x2, y2)
+
+        self.obstacle_manager.add_area_obstacles_async(lat1, lon1, lat2, lon2)
+
 if __name__ == '__main__':
     customtkinter.set_appearance_mode("System")  # Hỗ trợ chế độ giao diện hệ thống
     customtkinter.set_default_color_theme("blue")  # Đặt chủ đề màu sắc

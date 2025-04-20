@@ -121,6 +121,10 @@ class Graph:
         self._removed_edges[node_id]=removed
         self._kd_tree=None  # reset neu dung KDTree
 
+    def add_obstacles(self, node_list):
+        for node_id in node_list:
+            self.add_obstacle(node_id)
+
 
     def remove_obstacle(self, node_id):
         """Go node khoi danh sach va khoi phuc lai cac canh da xoa """
