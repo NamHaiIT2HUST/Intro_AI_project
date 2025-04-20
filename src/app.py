@@ -154,7 +154,7 @@ class App(customtkinter.CTk):
         self.remove_obstacle_button=customtkinter.CTkButton(
             self.panel,
             text="Xóa vật cản",
-            command=self.remove_obstacle,
+            command=self.remove_last_obstacle,
             fg_color="#D35B58", 
             hover_color="#C77C78"
         )
@@ -415,6 +415,15 @@ class App(customtkinter.CTk):
 
     def clear_selection(self):
         """Xóa tất cả các điểm đã chọn và đường đi"""
+
+        # xóa all vùng cấm = gọi nhiều lần remove_last_region
+        while self.obstacle_manager.region_stacks:
+            self.remove_last_region()
+
+        # Xóa tất cả các vật cản
+        while self.obstacle_stack:
+            self.remove_last_obstacle()
+            
         for marker in self.markers:
             marker.delete()
         self.markers.clear()
@@ -475,7 +484,7 @@ class App(customtkinter.CTk):
         if lat is None or lon is None:
             return 
         
-        node =self.find_nearest_node(lat,lon)
+        node = self.find_nearest_node(lat,lon)
         if node not in self.obstacles:
             self.obstacles.append(node)
             self.graph.add_obstacle(node)
@@ -491,20 +500,17 @@ class App(customtkinter.CTk):
                 self.run_algorithm_thread()
 
     #Xoa vat can
-    def remove_obstacle(self):
+    def remove_last_obstacle(self):
         if not self.obstacle_stack:
             return
-        last_obstacle_node=self.obstacle_stack.pop()
-        self.obstacles.remove(last_obstacle_node)
-        self.graph.remove_obstacle(last_obstacle_node)
-
-        #Xoa marker cua vat can tren ban do
-        for i in range(len(self.markers)-1, -1, -1):
-            marker = self.markers[i]
-            if hasattr(marker,"text") and marker.text =="Vật cản":
+        last_obstacle = self.obstacle_stack.pop()
+        self.graph.remove_obstacle(last_obstacle)
+        for marker in self.markers:
+            if hasattr(marker, "text") and marker.text == "Vật cản":
                 self.markers.remove(marker)
                 marker.delete()
-                break; # Xoa marker cua vat can gan nhat
+                break
+        #tìm đường lại nếu có
         self.map_widget.delete_all_path()
         if self.start_node and self.goal_node:
             self.run_algorithm_thread()

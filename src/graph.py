@@ -78,6 +78,8 @@ class Graph:
                     distance_m = geodesic((lat, lon), (node_lat, node_lon)).meters
                     candidates.append((distance_m, node_id))
 
+                if not candidates:
+                    return None
                 candidates.sort()
                 return candidates[0][1]
 
