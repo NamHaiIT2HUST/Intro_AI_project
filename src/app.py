@@ -136,16 +136,19 @@ class App(customtkinter.CTk):
          )
         self.obstacle_button.pack(pady=10)   
 
+        self.select_area_button = customtkinter.CTkButton(
+            self.panel, text="Chọn vùng cấm", command=self.toggle_region_draw
+        )
+        self.select_area_button.pack(pady=10)
+
         self.remove_region_button = customtkinter.CTkButton(
             self.panel,
             text="Xóa vùng cấm",
-            command=self.remove_last_region
+            command=self.remove_last_region,
+            fg_color="#D35B58", 
+            hover_color="#C77C78"
         )
         self.remove_region_button.pack(pady=10)
-
-        
-        self.select_area_button = customtkinter.CTkButton(self.panel, text="Chọn vùng cấm", command=self.toggle_region_draw)
-        self.select_area_button.pack(pady=10)
         
         # Them nut xoa vat can
         self.remove_obstacle_button=customtkinter.CTkButton(
