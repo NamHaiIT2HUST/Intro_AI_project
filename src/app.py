@@ -219,14 +219,13 @@ class App(customtkinter.CTk):
             self.map_widget.canvas.unbind(event)
 
     def on_map_click(self, event):
-        # Nếu đã có cả điểm đầu và điểm đích, không cho phép thêm điểm mới
-        # if self.start_node and self.goal_node:
-        #     return None
+        
         if getattr(self, 'obstacle_mode', False):
             self.add_obstacle((event.x, event.y))
             return
-
-
+        # Nếu đã có cả điểm đầu và điểm đích, không cho phép thêm điểm mới
+        if self.start_node and self.goal_node:
+            return None 
         lat, lon = self.map_widget.convert_canvas_coords_to_decimal_coords(event.x, event.y)
         
         if not self.g:
@@ -238,7 +237,6 @@ class App(customtkinter.CTk):
 
         marker = self.map_widget.set_marker(lat, lon)
         self.markers.append(marker)
-
         if not self.start_node:
             self.start_node = node
             marker.set_text("Điểm đầu")
