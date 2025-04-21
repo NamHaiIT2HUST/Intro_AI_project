@@ -34,7 +34,7 @@ class AStar(Algorithm):
         open_set.add(start)
         came_from = {}
         f_score = {node: float('inf') for node in graph.nodes}
-        f_score[start] = graph.heuristic(start, goal)
+        f_score[start] = self.heuristic(start, goal)
         g_score = {}
         g_score[start] = 0
 
@@ -51,7 +51,7 @@ class AStar(Algorithm):
                 if tentative_g_score < g_score.get(neighbor, float('inf')):
                     came_from[neighbor] = current
                     g_score[neighbor] = tentative_g_score
-                    f_score[neighbor] = g_score[neighbor] + graph.heuristic(neighbor, goal)
+                    f_score[neighbor] = g_score[neighbor] + self.heuristic(neighbor, goal)
                     if neighbor not in open_set:
                         open_queue.put((f_score[neighbor], neighbor))
                         open_set.add(neighbor)
@@ -305,3 +305,33 @@ class BellmanFord(Algorithm):
                 return None
             
         return count_node, self.reconstruct_path(start, goal, prev)
+
+class UCS(Algorithm):
+    def __init__(self, graph = None):
+        super().__init__()
+        self.graph = graph
+    
+    def run(self, start, goal, graph):
+        if start in graph.obstacles or goal in graph.obstacles:
+            return 0, None
+        count_node = 0
+        open_set = PriorityQueue()
+        open_set.put((0, start))
+        came_from = {}
+        g_score = {node: float('inf') for node in graph.nodes}
+        g_score[start] = 0
+
+        while not open_set.empty():
+            count_node += 1
+            _, current = open_set.get()
+            if current == goal:
+                return count_node, self.reconstruct_path(start, goal, came_from)
+            for neighbor in graph.neighbors(current):
+                if neighbor in graph.obstacles:
+                    continue
+                tentative_g_score = g_score[current] + graph.cost(current, neighbor)
+                if tentative_g_score < g_score.get(neighbor, float('inf')):
+                    came_from[neighbor] = current
+                    g_score[neighbor] = tentative_g_score
+                    open_set.put((g_score[neighbor], neighbor))
+        return count_node, None

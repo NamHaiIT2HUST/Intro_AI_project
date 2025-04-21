@@ -20,8 +20,9 @@ class App(customtkinter.CTk):
         "Greedy": lambda self: Greedy(self.distance),
         "BFS": lambda _: BFS(),
         "DFS": lambda _: DFS(),
+        "Bidirectional A*": lambda self: BidirectionalAStar(self.distance),
+        "UCS": lambda _: UCS(),
         "Bellman-Ford": lambda _: BellmanFord(),
-        "Bidirectional A*": lambda self: BidirectionalAStar(self.distance)
     }
     
     def __init__(self):
@@ -444,7 +445,7 @@ class App(customtkinter.CTk):
     @lru_cache(maxsize=1024)
     def distance(self, u, v):
         """Tính khoảng cách giữa hai nút, với cache để tăng hiệu suất"""
-        return self.graph.heuristic(u, v)  # Sử dụng hàm heuristic của đồ thị
+        return self.graph.heuristic1(u, v) # Sử dụng hàm heuristic của đồ thị
         
     def calculate_path_distance(self, path):
         """Tính tổng khoảng cách của đường đi"""

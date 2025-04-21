@@ -40,9 +40,28 @@ class Graph:
                 return cost
         return float('inf')
 
-    def heuristic(self, u, v):
+    def heuristic1(self, u, v):
         return geodesic(self.nodes[u], self.nodes[v]).meters
+
+    def heuristic2(self, u, v):
+        lat1, lon1 = self.nodes[u]
+        lat2, lon2 = self.nodes[v]
+        lat_mean = radians((lat1 + lat2) / 2)
+        dx = (lon2 - lon1) * 111320 * cos(lat_mean)
+        dy = (lat2 - lat1) * 111320
+        return sqrt(dx**2 + dy**2)
     
+    def heuristic3(self, u, v):
+        # Ưu tiên đi theo góc lệch so với thẳng tắp từ u đến v
+        lat1, lon1 = self.nodes[u]
+        lat2, lon2 = self.nodes[v]
+        lat_mean = radians((lat1 + lat2) / 2)
+        dx = (lon2 - lon1) * 111320 * cos(lat_mean)
+        dy = (lat2 - lat1) * 111320
+        angle = atan2(dy, dx)
+        multiplier = min(1 + abs(angle) / (math.pi / 4), 2)  # Giới hạn tối đa gấp đôi
+        return sqrt(dx**2 + dy**2) * multiplier
+
     def find_nearest_node(self, lat, lon):
         nearest_node = None
         min_distance = float('inf')
