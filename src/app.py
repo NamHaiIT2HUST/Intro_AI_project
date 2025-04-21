@@ -506,7 +506,7 @@ class App(customtkinter.CTk):
             return
         last_obstacle = self.obstacle_stack.pop()
         self.graph.remove_obstacle(last_obstacle)
-        for marker in self.markers:
+        for marker in self.markers[::-1]:
             if hasattr(marker, "text") and marker.text == "Vật cản":
                 self.markers.remove(marker)
                 marker.delete()
@@ -555,7 +555,7 @@ class App(customtkinter.CTk):
         # Xoá đường và chạy lại thuật toán nếu cần
         self.map_widget.delete_all_path()
         #xóa icon vùng cấm trên bản đồ
-        for marker in self.markers:
+        for marker in self.markers[::-1]:
             if hasattr(marker, "text") and marker.text == "Vùng cấm":
                 self.markers.remove(marker)
                 marker.delete()
