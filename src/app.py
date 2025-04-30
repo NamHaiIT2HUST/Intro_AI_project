@@ -89,12 +89,14 @@ class App(customtkinter.CTk):
             offvalue="User",
             width=50,
             height=25,
-            button_color="white",
-            button_hover_color="gray",
-            fg_color="blue",
-            progress_color="green"
+            border_width=1,                     # Viền mảnh
+            corner_radius=25,                  # Bo tròn đều (nửa chiều cao)
+            button_color="#ffffff",            # Nút tròn trắng
+            button_hover_color="white",      # Hover nhẹ
+            fg_color="blue",                # Màu nền nhẹ nhàng
+            progress_color="#4caf50"   
         )
-        self.toggle_mode_button.pack(pady=(10, 5), anchor="center")     
+        self.toggle_mode_button.pack(pady=(10, 5), anchor="center", side="top")
         self.toggle_mode_button.deselect()  # Mặc định là chế độ User
         
         self.title_label = customtkinter.CTkLabel(
