@@ -120,6 +120,22 @@ class App(customtkinter.CTk):
         )
         self.alg_selector.pack(pady=padding)
 
+        self.toggle_mode_button = customtkinter.CTkSwitch(
+            self.panel,
+            text="",
+            command=self.toggle_mode,
+            onvalue="Admin",
+            offvalue="User",
+            width=50,
+            height=25,
+            button_color="white",
+            button_hover_color="gray",
+            fg_color="blue",
+            progress_color="green"
+        )
+        self.toggle_mode_button.pack(pady=(10, 5), anchor="center")     
+        self.toggle_mode_button.deselect()  # Mặc định là chế độ User
+
         self.run_button = customtkinter.CTkButton(
             self.panel, 
             text="Tìm đường", 
@@ -194,6 +210,8 @@ class App(customtkinter.CTk):
             anchor="w"
         )
         self.time_label.pack(pady=5, anchor="w")
+        #  Ẩn các nút không cần thiết khi khởi động
+        self.toggle_mode()
         
     def toggle_obstacle_mode(self):
         self.obstacle_mode=not getattr(self,'obstacle_mode',False)
@@ -204,6 +222,9 @@ class App(customtkinter.CTk):
 
     def toggle_region_draw(self):
         """Bật/tắt chế độ vẽ vùng cấm"""
+        if self.toggle_mode_button.get() != "Admin":
+            return  # Không làm gì nếu không ở chế độ Admin
+
         self.is_drawing_area = not self.is_drawing_area  # Chuyển đổi trạng thái
         if self.is_drawing_area:
             self.select_area_button.configure(text="Hủy chọn vùng cấm")  # Thay đổi tên nút
@@ -232,83 +253,96 @@ class App(customtkinter.CTk):
             self.map_widget.canvas.unbind(event)
 
     def on_map_click(self, event):
-        
-        if getattr(self, 'obstacle_mode', False):
-            self.add_obstacle((event.x, event.y))
-            return
-        # Nếu đã có cả điểm đầu và điểm đích, không cho phép thêm điểm mới
-        if self.start_node and self.goal_node:
-            return None 
-        lat, lon = self.map_widget.convert_canvas_coords_to_decimal_coords(event.x, event.y)
-        
-        if not self.g:
-            return  # Bản đồ chưa được tải xong
-            
-        print(f"Clicked at: {lat}, {lon}")
-        node = self.find_nearest_node(lat, lon)
-        print(f"Nearest node: {node}") 
+        mode = self.toggle_mode_button.get()
 
-        marker = self.map_widget.set_marker(lat, lon)
-        self.markers.append(marker)
-        if not self.start_node:
-            self.start_node = node
-            marker.set_text("Điểm đầu")
-            # Đặt màu cho marker thay vì sử dụng icon
-            if hasattr(marker, "canvas_id"):
-                self.map_widget.canvas.itemconfig(marker.canvas_id, fill="green")
-        elif not self.goal_node:
-            self.goal_node = node
-            marker.set_text("Điểm đích")
-            # Đặt màu cho marker thay vì sử dụng icon
-            if hasattr(marker, "canvas_id"):
-                self.map_widget.canvas.itemconfig(marker.canvas_id, fill="red")
-            
-        self.update_run_button()
-    
+        if mode == "User":
+            # Chỉ cho phép chọn điểm đầu và điểm cuối trong chế độ User
+            if self.start_node and self.goal_node:
+                return  # Không cho phép thêm điểm mới nếu đã có cả điểm đầu và điểm cuối
+
+            lat, lon = self.map_widget.convert_canvas_coords_to_decimal_coords(event.x, event.y)
+
+            if not self.g:
+                return  # Bản đồ chưa được tải xong
+
+            print(f"Clicked at: {lat}, {lon}")
+            node = self.find_nearest_node(lat, lon)
+            print(f"Nearest node: {node}")
+
+            marker = self.map_widget.set_marker(lat, lon)
+            self.markers.append(marker)
+            if not self.start_node:
+                self.start_node = node
+                marker.set_text("Điểm đầu")
+                # Đặt màu cho marker thay vì sử dụng icon
+                if hasattr(marker, "canvas_id"):
+                    self.map_widget.canvas.itemconfig(marker.canvas_id, fill="green")
+            elif not self.goal_node:
+                self.goal_node = node
+                marker.set_text("Điểm đích")
+                # Đặt màu cho marker thay vì sử dụng icon
+                if hasattr(marker, "canvas_id"):
+                    self.map_widget.canvas.itemconfig(marker.canvas_id, fill="red")
+
+            self.update_run_button()
+
+        elif mode == "Admin":
+            # Chỉ cho phép đặt vật cản trong chế độ Admin
+            if getattr(self, 'obstacle_mode', False):
+                self.add_obstacle((event.x, event.y))
+
     def set_start_marker(self, coords):
+        # Chỉ cho phép đặt điểm đầu trong chế độ User
+        if self.toggle_mode_button.get() != "User":
+            return
+
         if self.start_node:
             # Xóa marker cũ nếu đã có
             for marker in self.markers:
                 if hasattr(marker, "text") and marker.text == "Điểm đầu":
                     self.markers.remove(marker)
                     marker.delete()
-        
+
         lat, lon = coords
         if not self.g:
             return  # Bản đồ chưa được tải xong
-            
+
         node = self.find_nearest_node(lat, lon)
-        
+
         marker = self.map_widget.set_marker(lat, lon, text="Điểm đầu")
         # Đặt màu cho marker thay vì sử dụng icon
         if hasattr(marker, "canvas_id"):
             self.map_widget.canvas.itemconfig(marker.canvas_id, fill="green")
         self.markers.append(marker)
         self.start_node = node
-        
+
         self.update_run_button()
     
     def set_goal_marker(self, coords):
+        # Chỉ cho phép đặt điểm đích trong chế độ User
+        if self.toggle_mode_button.get() != "User":
+            return
+
         if self.goal_node:
             # Xóa marker cũ nếu đã có
             for marker in self.markers:
                 if hasattr(marker, "text") and marker.text == "Điểm đích":
                     self.markers.remove(marker)
                     marker.delete()
-        
+
         lat, lon = coords
         if not self.g:
             return  # Bản đồ chưa được tải xong
-            
+
         node = self.find_nearest_node(lat, lon)
-        
+
         marker = self.map_widget.set_marker(lat, lon, text="Điểm đích")
         # Đặt màu cho marker thay vì sử dụng icon
         if hasattr(marker, "canvas_id"):
             self.map_widget.canvas.itemconfig(marker.canvas_id, fill="red")
         self.markers.append(marker)
         self.goal_node = node
-        
+
         self.update_run_button()
     
     def set_marker_color(self, marker, color):
@@ -480,21 +514,25 @@ class App(customtkinter.CTk):
             self.time_label.configure(text=f"Thời gian tìm kiếm: {stats.get('time', 'N/A'):.3f} ms")
             
     #Them vat can
-    def add_obstacle(self,coords):
-        lat,lon= self.map_widget.convert_canvas_coords_to_decimal_coords(*coords) if coords else (None,None)
+    def add_obstacle(self, coords):
+        # Chỉ cho phép đặt vật cản trong chế độ Admin
+        if self.toggle_mode_button.get() != "Admin":
+            return  # Không làm gì nếu không ở chế độ Admin
+
+        lat, lon = self.map_widget.convert_canvas_coords_to_decimal_coords(*coords) if coords else (None, None)
         if lat is None or lon is None:
-            return 
-        
-        node = self.find_nearest_node(lat,lon)
+            return
+
+        node = self.find_nearest_node(lat, lon)
         if node not in self.obstacles:
             self.obstacles.append(node)
             self.graph.add_obstacle(node)
             self.obstacle_stack.append(node)
             obstacle_icon = Image.open("res\\obstacle.png")
-            obstacle_icon = obstacle_icon.resize((30, 30),Image.Resampling.LANCZOS)
+            obstacle_icon = obstacle_icon.resize((30, 30), Image.Resampling.LANCZOS)
             obstacle_icon = ImageTk.PhotoImage(obstacle_icon)
-            marker=self.map_widget.set_marker(lat,lon,text="Vật cản",icon=obstacle_icon)
-            self.set_marker_color(marker,"black")
+            marker = self.map_widget.set_marker(lat, lon, text="Vật cản", icon=obstacle_icon)
+            self.set_marker_color(marker, "black")
             self.markers.append(marker)
             self.map_widget.delete_all_path()
             if self.start_node and self.goal_node:
@@ -562,10 +600,49 @@ class App(customtkinter.CTk):
                 break
         if self.start_node and self.goal_node:
             self.run_algorithm_thread()
+    def toggle_mode(self):
+        """Chuyển đổi giữa chế độ User và Admin."""
+        mode = self.toggle_mode_button.get()
+        padding =9
+        if mode == "User":
+            # Ẩn các nút không cần thiết trong chế độ User
+            self.title_label.pack(pady=(15, padding))
+            self.instruction_label.pack(pady=padding)
+            self.status_label.pack(pady=padding)
+            self.status_label_obstacle.pack_forget()
+            self.alg_label.pack(pady=(5, 5))
+            self.alg_selector.pack(pady=padding)
+            self.run_button.pack(pady=padding)
+            self.obstacle_button.pack_forget()
+            self.select_area_button.pack_forget()
+            self.remove_region_button.pack_forget()
+            self.remove_obstacle_button.pack_forget()
+            self.clear_button.pack(pady=padding)
+            self.info_frame.pack(pady=padding,fill="x",padx=padding)
+            self.distance_label.pack(pady=5,anchor="w")
+            self.nodes_label.pack(pady=5,anchor="w")
+            self.time_label.pack(pady=5,anchor="w")
+        else:
+            # Hiển thị các nút trong chế độ Admin
+            self.title_label.pack_forget()
+            self.instruction_label.pack_forget()
+            self.status_label.pack_forget()
+            self.status_label_obstacle.pack(pady=padding)
+            self.alg_label.pack_forget()
+            self.alg_selector.pack_forget()
+            self.run_button.pack_forget()
+            self.obstacle_button.pack(pady=10)
+            self.select_area_button.pack(pady=10)
+            self.remove_region_button.pack(pady=10)
+            self.remove_obstacle_button.pack(pady=10)
+            self.clear_button.pack_forget()
+            self.info_frame.pack_forget()
+            self.distance_label.pack_forget()
+            self.nodes_label.pack_forget()
+            self.time_label.pack_forget()
 
 if __name__ == '__main__':
     customtkinter.set_appearance_mode("System")  # Hỗ trợ chế độ giao diện hệ thống
     customtkinter.set_default_color_theme("blue")  # Đặt chủ đề màu sắc
-    
     app = App()
     app.mainloop()
