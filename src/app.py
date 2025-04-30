@@ -81,6 +81,22 @@ class App(customtkinter.CTk):
         # Thiết lập các widget trong panel
         padding = 9
         
+        self.toggle_mode_button = customtkinter.CTkSwitch(
+            self.panel,
+            text="",
+            command=self.toggle_mode,
+            onvalue="Admin",
+            offvalue="User",
+            width=50,
+            height=25,
+            button_color="white",
+            button_hover_color="gray",
+            fg_color="blue",
+            progress_color="green"
+        )
+        self.toggle_mode_button.pack(pady=(10, 5), anchor="center")     
+        self.toggle_mode_button.deselect()  # Mặc định là chế độ User
+        
         self.title_label = customtkinter.CTkLabel(
             self.panel, 
             text="Tìm đường đi",
@@ -120,21 +136,6 @@ class App(customtkinter.CTk):
         )
         self.alg_selector.pack(pady=padding)
 
-        self.toggle_mode_button = customtkinter.CTkSwitch(
-            self.panel,
-            text="",
-            command=self.toggle_mode,
-            onvalue="Admin",
-            offvalue="User",
-            width=50,
-            height=25,
-            button_color="white",
-            button_hover_color="gray",
-            fg_color="blue",
-            progress_color="green"
-        )
-        self.toggle_mode_button.pack(pady=(10, 5), anchor="center")     
-        self.toggle_mode_button.deselect()  # Mặc định là chế độ User
 
         self.run_button = customtkinter.CTkButton(
             self.panel, 
@@ -451,21 +452,27 @@ class App(customtkinter.CTk):
     def clear_selection(self):
         """Xóa tất cả các điểm đã chọn và đường đi"""
 
-        # xóa all vùng cấm = gọi nhiều lần remove_last_region
-        while self.obstacle_manager.region_stacks:
-            self.remove_last_region()
+        # # xóa all vùng cấm = gọi nhiều lần remove_last_region
+        # while self.obstacle_manager.region_stacks:
+        #     self.remove_last_region()
 
-        # Xóa tất cả các vật cản
-        while self.obstacle_stack:
-            self.remove_last_obstacle()
+        # # Xóa tất cả các vật cản
+        # while self.obstacle_stack:
+        #     self.remove_last_obstacle()
             
-        for marker in self.markers:
-            marker.delete()
-        self.markers.clear()
+        # for marker in self.markers:
+        #     marker.delete()
+        # self.markers.clear()
+        # self.start_node = None
+        # self.goal_node = None
+        # self.map_widget.canvas.delete(self.region_rectangle)
+        # self.region_rectangle = None
+        for marker in self.markers[:]:
+            if marker.text in ["Điểm đầu", "Điểm đích"]:
+                self.markers.remove(marker)
+                marker.delete()
         self.start_node = None
         self.goal_node = None
-        self.map_widget.canvas.delete(self.region_rectangle)
-        self.region_rectangle = None
         self.map_widget.delete_all_path()
         # Đặt lại nhãn thông tin
         self.distance_label.configure(text="Khoảng cách: N/A")
