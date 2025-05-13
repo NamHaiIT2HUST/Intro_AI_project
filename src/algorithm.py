@@ -136,7 +136,7 @@ class BidirectionalAStar(Algorithm):
         _, current = open_queue.get()
         if current in closed:
             return 0
-        open_set.remove(current)
+        open_set.discard(current)
         closed.add(current)
 
         for neighbor in graph.neighbors(current):
