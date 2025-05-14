@@ -26,7 +26,7 @@ class ObstacleManager:
     def _add_area_marker(self, lat1, lon1, lat2, lon2):
         lat_c = (lat1 + lat2) / 2
         lon_c = (lon1 + lon2) / 2
-        img = Image.open("res\\house-flood-water-solid.png").resize((30, 30), Image.Resampling.LANCZOS)
+        img = Image.open("Intro_AI\\res\\house-flood-water-solid.png").resize((30, 30), Image.Resampling.LANCZOS)
         icon = ImageTk.PhotoImage(img)
         marker = self.app.map_widget.set_marker(lat_c, lon_c, text="Vùng cấm", icon=icon)
         self.app.set_marker_color(marker, "black")
