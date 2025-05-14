@@ -13,7 +13,7 @@ from obstacle_manager import ObstacleManager
 class App(customtkinter.CTk):
     APP_NAME = "Map View - Kim Mã, Ba Đình"
     CENTER_LAT, CENTER_LON = 21.0313417781923, 105.82443016071318
-    source_path = r"Intro_AI/res/map.osm"
+    source_path = r"res/map.osm"
     ALGORITHMS = {
         "A*": lambda self: AStar(self.distance),
         "Dijkstra": lambda _: Dijkstra(),
@@ -537,7 +537,7 @@ class App(customtkinter.CTk):
             self.obstacles.append(node)
             self.graph.add_obstacle(node)
             self.obstacle_stack.append(node)
-            obstacle_icon = Image.open("Intro_AI\\res\\obstacle.png")
+            obstacle_icon = Image.open("res\\obstacle.png")
             obstacle_icon = obstacle_icon.resize((30, 30), Image.Resampling.LANCZOS)
             obstacle_icon = ImageTk.PhotoImage(obstacle_icon)
             marker = self.map_widget.set_marker(lat, lon, text="Vật cản", icon=obstacle_icon)
