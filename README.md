@@ -4,7 +4,7 @@
 - **Đào Trọng Nguyên** - 20235390
 - **Trần Ngọc Huyền** - 20235347
 - **Nguyễn Đào Nam Hải** - 2023xxxx
-- **Lê Quốc Dũng** - 20235302
+- **Lưu Quốc Dũng** - 20235302
 - **Đặng Phương Uyên** - 20235456
 
 Dự án được ra đời với mục tiêu hỗ trợ hiểu về thuật toán và cách ứng dụng thuật toán trong các bài toán thực tế
