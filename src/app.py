@@ -13,7 +13,7 @@ from obstacle_manager import ObstacleManager
 class App(customtkinter.CTk):
     APP_NAME = "Map View - Kim Mã, Ba Đình"
     CENTER_LAT, CENTER_LON = 21.0313417781923, 105.82443016071318
-    source_path = r"res/map.osm"
+    source_path = r"res/KimMa.osm"
     ALGORITHMS = {
         "A*": lambda self: AStar(self.distance),
         "Dijkstra": lambda _: Dijkstra(),
