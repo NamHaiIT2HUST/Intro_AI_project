@@ -2,10 +2,10 @@
 ## 👥 Về nhóm phát triển
 **Project tìm đường đi trên lược đồ được mô phỏng** được phát triển bởi 5 sinh viên Đại học Bách Khoa Hà Nội:
 - **Đào Trọng Nguyên** - 20235390
-- **Trần Ngọc Huyền** - 2023xxxx
+- **Trần Ngọc Huyền** - 20235347
 - **Nguyễn Đào Nam Hải** - 2023xxxx
 - **Lê Quốc Dũng** - 2023xxxx
-- **Đặng Phương Uyên** - 2023xxxx
+- **Đặng Phương Uyên** - 20235456
 
 Dự án được ra đời với mục tiêu hỗ trợ hiểu về thuật toán và cách ứng dụng thuật toán trong các bài toán thực tế
 
