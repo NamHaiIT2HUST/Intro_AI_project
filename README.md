@@ -26,7 +26,4 @@ Chúng tôi hoan nghênh sự đóng góp của người dùng và các nhà ph�
 ### Các bước cài đặt
 1. Clone mã nguồn dự án
    Link mã nguồn : 
-2. Cài đặt các thư viện cần thiết
-   Bạn cần cài đặt thư viện để khởi chạy phần mềm
-   bash: `pip install -r requirements.txt`
-3. Tìm file run.bat để khởi chạy
+2. Tìm file run.bat để khởi chạy
