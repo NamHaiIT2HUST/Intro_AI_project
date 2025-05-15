@@ -4,6 +4,8 @@ cd intro_ai
 
 pip install -r requirements.txt
 
+cls
+
 :: Chạy ứng dụng Python
 python src/app.py
 
