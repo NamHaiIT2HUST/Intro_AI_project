@@ -198,8 +198,6 @@ class Dijkstra(Algorithm):
             count_node += 1
             _, current = open_queue.get()
             open_set.remove(current)
-            if current == goal:
-                return count_node, self.reconstruct_path(start, goal, came_from)
             for neighbor in graph.neighbors(current):
                 tentative_g_score = g_score[current] + graph.cost(current, neighbor)
                 if tentative_g_score < g_score.get(neighbor, float('inf')):
@@ -208,7 +206,10 @@ class Dijkstra(Algorithm):
                     if neighbor not in open_set:
                         open_queue.put((g_score[neighbor], neighbor))
                         open_set.add(neighbor)
-        return count_node, None
+        if goal in g_score and g_score[goal] != float('inf'):
+            return count_node, self.reconstruct_path(start, goal, came_from)
+        else:
+            return count_node, None
     
 class BFS(Algorithm):
     def __init__(self, graph = None):
@@ -310,15 +311,16 @@ class UCS(Algorithm):
         if start in graph.obstacles or goal in graph.obstacles:
             return 0, None
         count_node = 0
-        open_set = PriorityQueue()
-        open_set.put((0, start))
+        open_queue = PriorityQueue()
+        open_queue.put((0, start))
         came_from = {}
         g_score = {node: float('inf') for node in graph.nodes}
         g_score[start] = 0
+        open_set = {start}
 
-        while not open_set.empty():
+        while not open_queue.empty():
             count_node += 1
-            _, current = open_set.get()
+            _, current = open_queue.get()
             if current == goal:
                 return count_node, self.reconstruct_path(start, goal, came_from)
             for neighbor in graph.neighbors(current):
@@ -326,6 +328,8 @@ class UCS(Algorithm):
                 if tentative_g_score < g_score.get(neighbor, float('inf')):
                     came_from[neighbor] = current
                     g_score[neighbor] = tentative_g_score
-                    open_set.put((g_score[neighbor], neighbor))
+                    if neighbor not in open_set:
+                        open_queue.put((g_score[neighbor], neighbor))
+                        open_set.add(neighbor)
         return count_node, None
 

@@ -217,7 +217,7 @@ class App(customtkinter.CTk):
         self.toggle_mode()
         
     def toggle_obstacle_mode(self):
-        self.obstacle_mode=not getattr(self,'obstacle_mode',False)
+        self.obstacle_mode = not getattr(self,'obstacle_mode',False)
         if self.obstacle_mode:
             self.status_label_obstacle.configure(text="Chế độ vật cản: Bật",text_color="green")
         else:
@@ -363,14 +363,11 @@ class App(customtkinter.CTk):
         try:
             # Tải dữ liệu đồ thị từ file OSM
             self.g = ox.graph_from_xml(self.source_path, retain_all=True, simplify=False)
-            
             # Chuyển đổi sang đồ thị nội bộ
             for node_id, data in self.g.nodes(data=True):
                 self.graph.add_node(node_id, data['y'], data['x'])
-            
             for u, v, data in self.g.edges(data=True):
                 self.graph.add_edge(u, v, data['length'])
-            
             # Cập nhật giao diện sau khi tải xong
             self.after(0, self.on_graph_loaded)
         except Exception as e:
@@ -380,7 +377,7 @@ class App(customtkinter.CTk):
                 text=f"Lỗi tải bản đồ: {str(e)[:50]}...", 
                 text_color="red"
             ))
-    
+            
     def on_graph_loaded(self):
         self.status_label.configure(text="Bản đồ đã sẵn sàng", text_color="green")
         self.update_run_button()
@@ -485,7 +482,7 @@ class App(customtkinter.CTk):
         # Cập nhật trạng thái nút tìm đường
         self.update_run_button()
 
-    @lru_cache(maxsize=1024)
+    @lru_cache(maxsize=128)
     def distance(self, u, v):
         """Tính khoảng cách giữa hai nút, với cache để tăng hiệu suất"""
         return self.graph.heuristic1(u, v) # Sử dụng hàm heuristic của đồ thị
