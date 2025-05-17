@@ -363,6 +363,7 @@ class App(customtkinter.CTk):
         try:
             # Tải dữ liệu đồ thị từ file OSM
             self.g = ox.graph_from_xml(self.source_path, retain_all=True, simplify=False)
+            print(len(self.g.nodes), len(self.g.edges))
             # Chuyển đổi sang đồ thị nội bộ
             for node_id, data in self.g.nodes(data=True):
                 self.graph.add_node(node_id, data['y'], data['x'])
@@ -450,22 +451,6 @@ class App(customtkinter.CTk):
 
     def clear_selection(self):
         """Xóa tất cả các điểm đã chọn và đường đi"""
-
-        # # xóa all vùng cấm = gọi nhiều lần remove_last_region
-        # while self.obstacle_manager.region_stacks:
-        #     self.remove_last_region()
-
-        # # Xóa tất cả các vật cản
-        # while self.obstacle_stack:
-        #     self.remove_last_obstacle()
-            
-        # for marker in self.markers:
-        #     marker.delete()
-        # self.markers.clear()
-        # self.start_node = None
-        # self.goal_node = None
-        # self.map_widget.canvas.delete(self.region_rectangle)
-        # self.region_rectangle = None
         for marker in self.markers[:]:
             if marker.text in ["Điểm đầu", "Điểm đích"]:
                 self.markers.remove(marker)

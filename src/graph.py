@@ -40,6 +40,9 @@ class Graph:
                 return cost
         return float('inf')
     
+    def has_edge(self, u, v):
+        return v in self.neighbors(u)
+    
     def heuristic(self, u, v):
         # Sử dụng hàm heuristic1 làm mặc định
         return self.heuristic1(u, v)
@@ -70,7 +73,7 @@ class Graph:
         nearest_node = None
         min_distance = float('inf')
 
-        for node_id, (node_lat, node_lon) in self.nodes.items():
+        for node_id, _ in self.nodes.items():
             distance = self.heuristic(node_id, (lat, lon))
             if distance < min_distance:
                 min_distance = distance
@@ -78,15 +81,10 @@ class Graph:
 
         return nearest_node
     
-    def has_edge(self, u, v):
-        return v in self.neighbors(u)
-    
     def find_nearest_node_within_radius(self, lat, lon, initial_radius=10, step=10, max_radius=1000):
         if not self._kd_tree:
             self._build_kdtree()
-
         radius = initial_radius
-
         while radius <= max_radius:
             approx_radius_deg = radius / 111320  # Đổi mét sang độ
             idxs = self._kd_tree.query_ball_point([lat, lon], r=approx_radius_deg)
@@ -105,9 +103,7 @@ class Graph:
                     return None
                 candidates.sort()
                 return candidates[0][1]
-
             radius += step
-
         return None
 
     def _build_kdtree(self):
