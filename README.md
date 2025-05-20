@@ -27,3 +27,30 @@ Chúng tôi hoan nghênh sự đóng góp của người dùng và các nhà ph�
 1. Clone mã nguồn dự án
    Link mã nguồn : 
 2. Tìm file run.bat để khởi chạy
+
+---
+
+# Pathfinding in a diagram using search algorithms
+## 👥 About the development team
+**Project for pathfinding on a simulated diagram** developed by 5 students from Hanoi University of Science and Technology:
+- **Đào Trọng Nguyên** - 20235390
+- **Trần Ngọc Huyền** - 20235347
+- **Nguyễn Đào Nam Hải** - 2023xxxx
+- **Lưu Quốc Dũng** - 20235302
+- **Đặng Phương Uyên** - 20235456
+
+The project was created with the goal of supporting understanding of algorithms and how to apply algorithms in real-world problems.
+
+We welcome contributions from users and other developers to develop, optimize, and fix algorithms.
+
+
+## 🐍 Technology used
+- **Programming language**: Python
+- **Library**: tkintermapview to build the interface
+- **Interface design tool**: customtkinter
+
+## 🚀 Installation
+### Prerequisites:
+1. **Python**: Ensure Python version 3.6 or higher is installed.
+2. **pip**: Confirm that the `pip` package manager is installed.
+3. **IDE**: Use Visual Studio Code (VSCode) or other suitable development environments.
