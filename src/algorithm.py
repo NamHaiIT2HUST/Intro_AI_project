@@ -333,3 +333,79 @@ class UCS(Algorithm):
                         open_set.add(neighbor)
         return count_node, None
 
+class BidirectionalDijkstra(Algorithm):
+    def __init__(self, graph = None):
+        super().__init__()
+        self.graph = graph
+    
+    def run(self, start, goal, graph):
+        if start in graph.obstacles or goal in graph.obstacles:
+            return 0, None
+        count_node = 0
+        open_set_start = PriorityQueue()
+        open_set_goal = PriorityQueue()
+        open_set_start.put((0, start))
+        open_set_goal.put((0, goal))
+        came_from_start = {}
+        came_from_goal = {}
+        g_score_start = {node: float('inf') for node in graph.nodes}
+        g_score_goal = {node: float('inf') for node in graph.nodes}
+        g_score_start[start] = 0
+        g_score_goal[goal] = 0
+        open_set_start_set = {start}
+        open_set_goal_set = {goal}
+
+        best_node = None
+        best_path_cost = float('inf')
+        mu = float('inf')
+        while not open_set_start.empty() and not open_set_goal.empty():
+            f_min_start = open_set_start.queue[0][0]
+            f_min_goal = open_set_goal.queue[0][0]
+            if mu <= f_min_start + f_min_goal:
+                break
+
+            if len(open_set_start_set) <= len(open_set_goal_set):
+                count_node += self._expand(
+                    open_set_start, open_set_start_set, g_score_start, came_from_start,
+                    open_set_goal_set, g_score_goal, goal, graph
+                )
+            else:
+                count_node += self._expand(
+                    open_set_goal, open_set_goal_set, g_score_goal, came_from_goal,
+                    open_set_start_set, g_score_start, start, graph
+                )
+
+            # Kiểm tra node giao nhau giữa 2 phía
+            intersection = open_set_start_set & open_set_goal_set
+            for node in intersection:
+                if node in g_score_start and node in g_score_goal:
+                    cost = g_score_start[node] + g_score_goal[node]
+                    if cost < best_path_cost:
+                        best_path_cost = cost
+                        best_node = node
+                        mu = cost
+        if best_node:
+            path_start = self.reconstruct_path(start, best_node, came_from_start)
+            path_goal = self.reconstruct_path(goal, best_node, came_from_goal)[::-1]
+            if path_goal and path_goal[0] == best_node:
+                path_goal = path_goal[1:]
+            return count_node, path_start + path_goal
+        else:
+            return count_node, None
+    def _expand(self, open_queue, open_set, g_score, came_from,
+                other_open_set, other_g_score, target, graph):
+        if open_queue.empty():
+            return 0
+        _, current = open_queue.get()
+        open_set.remove(current)
+        for neighbor in graph.neighbors(current):
+            if neighbor in open_set:
+                continue
+            tentative_g_score = g_score[current] + graph.cost(current, neighbor)
+            if tentative_g_score < g_score.get(neighbor, float('inf')):
+                came_from[neighbor] = current
+                g_score[neighbor] = tentative_g_score
+                if neighbor not in open_set:
+                    open_queue.put((g_score[neighbor], neighbor))
+                    open_set.add(neighbor)
+        return 1

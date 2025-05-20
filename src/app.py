@@ -17,6 +17,7 @@ class App(customtkinter.CTk):
     ALGORITHMS = {
         "A*": lambda self: AStar(self.distance),
         "Dijkstra": lambda _: Dijkstra(),
+        "Bidirectional Dijkstra": lambda _: BidirectionalDijkstra(),
         "Greedy": lambda self: Greedy(self.distance),
         "BFS": lambda _: BFS(),
         "DFS": lambda _: DFS(),
