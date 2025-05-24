@@ -1,6 +1,6 @@
 @echo off
 
-cd intro_ai
+cd intro_ai_it3160_20242
 
 pip install -r requirements.txt
 
