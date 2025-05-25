@@ -29,6 +29,7 @@ class App(customtkinter.CTk):
     def __init__(self):
         super().__init__()
         self.title(self.APP_NAME)
+        self.iconbitmap("res/icon.ico")
         self.geometry("1000x700")
         self.resizable(True, True)  # Cho phép điều chỉnh kích thước cửa sổ
 
@@ -632,9 +633,3 @@ class App(customtkinter.CTk):
             self.distance_label.pack_forget()
             self.nodes_label.pack_forget()
             self.time_label.pack_forget()
-
-if __name__ == '__main__':
-    customtkinter.set_appearance_mode("System")  # Hỗ trợ chế độ giao diện hệ thống
-    customtkinter.set_default_color_theme("blue")  # Đặt chủ đề màu sắc
-    app = App()
-    app.mainloop()
