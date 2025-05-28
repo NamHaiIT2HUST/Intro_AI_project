@@ -572,7 +572,7 @@ class App(customtkinter.CTk):
         lat2, lon2 = self.map_widget.convert_canvas_coords_to_decimal_coords(x2, y2)
 
         self.obstacle_manager.add_area_obstacles_async(lat1, lon1, lat2, lon2)
-        self.map_widget.canvas.delete(self.region_rectangle)
+        # self.map_widget.canvas.delete(self.region_rectangle)
         self.region_rectangle = None
 
     #Xoa vung cam
