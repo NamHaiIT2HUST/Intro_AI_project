@@ -584,6 +584,7 @@ class App(customtkinter.CTk):
             self.graph.remove_obstacle(node)
             # nếu bạn lưu marker vùng cấm, cũng cần xóa marker tương ứng ở đây
         # Xoá đường và chạy lại thuật toán nếu cần
+        self.map_widget.canvas.delete(self.region_rectangle)
         self.map_widget.delete_all_path()
         #xóa icon vùng cấm trên bản đồ
         for marker in self.markers[::-1]:
