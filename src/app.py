@@ -48,7 +48,7 @@ class App(customtkinter.CTk):
         self.region_start_canvas_coords = None
         self.region_rectangle = None
         self.obstacle_manager = ObstacleManager(self)
-
+        self.region_rectangles = []  # Lưu các ID hình chữ nhật vùng cấm
         # Thiết lập giao diện và bản đồ
         self._setup_ui()
         self._initialize_map()
@@ -573,6 +573,7 @@ class App(customtkinter.CTk):
 
         self.obstacle_manager.add_area_obstacles_async(lat1, lon1, lat2, lon2)
         # self.map_widget.canvas.delete(self.region_rectangle)
+        self.region_rectangles.append(self.region_rectangle)  # Lưu ID vùng cấm
         self.region_rectangle = None
 
     #Xoa vung cam
@@ -582,9 +583,11 @@ class App(customtkinter.CTk):
         last_region = self.obstacle_manager.region_stacks.pop()  # danh sách node
         for node in last_region:
             self.graph.remove_obstacle(node)
-            # nếu bạn lưu marker vùng cấm, cũng cần xóa marker tương ứng ở đây
+        # nếu bạn lưu marker vùng cấm, cũng cần xóa marker tương ứng ở đây
         # Xoá đường và chạy lại thuật toán nếu cần
-        self.map_widget.canvas.delete(self.region_rectangle)
+        if self.region_rectangles:
+            rect_id = self.region_rectangles.pop()
+            self.map_widget.canvas.delete(rect_id)
         self.map_widget.delete_all_path()
         #xóa icon vùng cấm trên bản đồ
         for marker in self.markers[::-1]:
