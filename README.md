@@ -3,7 +3,7 @@
 **Project tìm đường đi trên lược đồ được mô phỏng** được phát triển bởi 5 sinh viên Đại học Bách Khoa Hà Nội:
 - **Đào Trọng Nguyên** - 20235390
 - **Trần Ngọc Huyền** - 20235347
-- **Nguyễn Đào Nam Hải** - 2023xxxx
+- **Nguyễn Đào Nam Hải** - 20235321
 - **Lưu Quốc Dũng** - 20235302
 - **Đặng Phương Uyên** - 20235456
 
